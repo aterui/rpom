@@ -408,7 +408,7 @@ npom <- function(foodweb,
   return(cout)
 }
 
-#' Equilibrium food chain length
+#' Equilibrium food chain length (analytical)
 #'
 #' @inheritParams u_length
 #' @inheritParams p_base
@@ -435,16 +435,16 @@ fcl <- function(foodweb,
                 rho = c(0.5, 0.5)) {
 
   ## foodweb: matrix, consumer-resource matrix. produce with ppm()
-  foodweb <- abs(foodweb)
-  foodweb[lower.tri(foodweb)] <- 0
+  fwb <- abs(foodweb)
+  fwb[lower.tri(fwb)] <- 0
 
   ## p_hat: vector, equilibrium occupancy
   ## max_prey: vector, maximum number of prey items for consumer j
-  p_hat <- rep(-1, ncol(foodweb))
-  max_prey <- colSums(foodweb)
+  p_hat <- rep(-1, ncol(fwb))
+  max_prey <- colSums(fwb)
 
   ## sequential determination of equilibrium occupancies
-  for (j in seq_len(ncol(foodweb))) {
+  for (j in seq_len(ncol(fwb))) {
 
     if (max_prey[j] == 0) {
       ## basal species
@@ -461,7 +461,7 @@ fcl <- function(foodweb,
       ## consumers
 
       ## index of prey species for consumer j
-      index_prey <- which(foodweb[, j] == 1)
+      index_prey <- which(fwb[, j] == 1)
 
       ## mean-field prey richness
       prey <- sum(p_hat[index_prey])
@@ -489,7 +489,7 @@ fcl <- function(foodweb,
     ## index of persistent species
     ## subset the foodweb by persistent species
     index_p <- which(p_hat > 0)
-    sub_fw <- foodweb[index_p, index_p]
+    sub_fw <- as.matrix(fwb[index_p, index_p])
     tp <- rep(-1, ncol(sub_fw))
 
     ## index of basal species, number of basal, number of prey
