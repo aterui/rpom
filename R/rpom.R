@@ -264,12 +264,12 @@ fcl <- function(foodweb,
   foodweb <- abs(foodweb)
   foodweb[lower.tri(foodweb)] <- 0
 
-  ## p_hat: vector, equilibrium occpancy
+  ## p_hat: vector, equilibrium occupancy
   ## max_prey: vector, maximum number of prey items for consumer j
   p_hat <- rep(-1, ncol(foodweb))
   max_prey <- colSums(foodweb)
 
-  ## seqencial determination of equilibrium occupancies
+  ## sequential determination of equilibrium occupancies
   for (j in seq_len(ncol(foodweb))) {
 
     if (max_prey[j] == 0) {
