@@ -523,3 +523,97 @@ fcl <- function(foodweb,
 
   return(fcl)
 }
+
+
+#' Equilibrium food chain length (numerical)
+#'
+#' @inheritParams u_length
+#' @inheritParams npom
+#' @param foodweb Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
+#'
+#' @author Akira Terui, \email{hanabi0111@gmail.com}
+#'
+#' @export
+
+nfcl <- function(foodweb,
+                 lambda,
+                 size,
+                 h = 1,
+                 delta = 1,
+                 rsrc = 1,
+                 g = 10,
+                 mu0 = 1,
+                 mu_p = 1,
+                 mu_c = 1,
+                 mu_s = 1,
+                 rho = 0.5,
+                 x0 = 0.5,
+                 n_timestep = 100,
+                 interval = 0.01,
+                 threshold = 1E-5) {
+
+  ## numerical simulation
+  cout <- npom(foodweb = foodweb,
+               lambda = lambda,
+               size = size,
+               h = h,
+               delta = delta,
+               rsrc = rsrc,
+               g = g,
+               mu0 = mu0,
+               mu_p = mu_p,
+               mu_c = mu_c,
+               mu_s = mu_s,
+               rho = rho,
+               x0 = x0,
+               n_timestep = n_timestep,
+               interval = interval,
+               threshold = threshold)
+
+  p_hat <- cout[nrow(cout), -1]
+
+  ## report fcl as the maximum binary trophic position in the landscape
+  fwb <- abs(foodweb)
+  fwb[lower.tri(fwb)] <- 0
+
+  if (any(p_hat > 0)) {
+    ## at least one species persist
+
+    ## index of persistent species
+    ## subset the foodweb by persistent species
+    index_p <- which(p_hat > 0)
+    sub_fw <- as.matrix(fwb[index_p, index_p])
+    tp <- rep(-1, ncol(sub_fw))
+
+    ## index of basal species, number of basal, number of prey
+    index_b <- which(colSums(sub_fw) == 0)
+    n_b <- sum(colSums(sub_fw) == 0)
+    n_p <- colSums(sub_fw)
+
+    if (any(n_p > 0)) {
+      ## tp = 1 if basal
+      tp[index_b] <- 1
+
+      for (i in (n_b + 1):length(tp)) {
+        ## update tp recursively if consumers
+        tp[i] <-  (drop(tp %*% sub_fw)[i]) / n_p[i] + 1
+      }
+
+    } else {
+
+      tp[index_b] <- 1
+
+    }
+
+    fcl <- max(tp)
+    attr(fcl, "tp") <- tp
+  } else {
+    ## no species persist
+    fcl <- 0
+  }
+
+  attr(fcl, "p_hat") <- p_hat
+
+  return(fcl)
+}
+
