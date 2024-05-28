@@ -2,7 +2,7 @@
 % Please edit documentation in R/rpom.R
 \name{fcl}
 \alias{fcl}
-\title{Equilibrium food chain length}
+\title{Equilibrium food chain length (analytical)}
 \usage{
 fcl(
   foodweb,
@@ -41,7 +41,7 @@ fcl(
 \code{rho[2]} for consumers.}
 }
 \description{
-Equilibrium food chain length
+Equilibrium food chain length (analytical)
 }
 \author{
 Akira Terui, \email{hanabi0111@gmail.com}
