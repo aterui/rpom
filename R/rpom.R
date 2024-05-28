@@ -233,123 +233,6 @@ p_cnsm <- function(lambda,
   return(p_hat)
 }
 
-
-#' Equilibrium food chain length
-#'
-#' @inheritParams u_length
-#' @inheritParams p_base
-#' @param foodweb Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
-#' @param mu_base Numeric vector of disturbance rates for basal species.
-#' @param mu_cnsm Numeric vector of disturbance rates for consumer species.
-#' @param rho Numeric vector of synchrony probability.
-#'  \code{rho[1]} for basal species;
-#'  \code{rho[2]} for consumers.
-#'
-#' @author Akira Terui, \email{hanabi0111@gmail.com}
-#'
-#' @export
-
-fcl <- function(foodweb,
-                lambda,
-                size,
-                h = 1,
-                delta = c(1, 1),
-                rsrc = 1,
-                g = c(10, 10),
-                mu_base = 1,
-                mu_cnsm = 1,
-                rho = c(0.5, 0.5)) {
-
-  ## foodweb: matrix, consumer-resource matrix. produce with ppm()
-  foodweb <- abs(foodweb)
-  foodweb[lower.tri(foodweb)] <- 0
-
-  ## p_hat: vector, equilibrium occupancy
-  ## max_prey: vector, maximum number of prey items for consumer j
-  p_hat <- rep(-1, ncol(foodweb))
-  max_prey <- colSums(foodweb)
-
-  ## sequential determination of equilibrium occupancies
-  for (j in seq_len(ncol(foodweb))) {
-
-    if (max_prey[j] == 0) {
-      ## basal species
-      p_hat[j] <- p_base(lambda = lambda,
-                         size = size,
-                         h = h,
-                         delta = delta[1],
-                         rsrc = rsrc,
-                         mu = mu_base,
-                         rho = rho[1],
-                         g = g[1])
-
-    } else {
-      ## consumers
-
-      ## index of prey species for consumer j
-      index_prey <- which(foodweb[, j] == 1)
-
-      ## mean-field prey richness
-      prey <- sum(p_hat[index_prey])
-
-      ## possible maximum of prey richness
-      n_prey <- max_prey[j]
-
-      p_hat[j] <- p_cnsm(lambda = lambda,
-                         size = size,
-                         h = h,
-                         delta = delta[2],
-                         prey = prey,
-                         max_prey = n_prey,
-                         mu = mu_cnsm,
-                         rho = rho[2],
-                         g = g[2])
-
-    } # ifelse
-  } # for j
-
-  ## report fcl as the maximum binary trophic position in the landscape
-  if (any(p_hat > 0)) {
-    ## at least one species persist
-
-    ## index of persistent species
-    ## subset the foodweb by persistent species
-    index_p <- which(p_hat > 0)
-    sub_fw <- foodweb[index_p, index_p]
-    tp <- rep(-1, ncol(sub_fw))
-
-    ## index of basal species, number of basal, number of prey
-    index_b <- which(colSums(sub_fw) == 0)
-    n_b <- sum(colSums(sub_fw) == 0)
-    n_p <- colSums(sub_fw)
-
-    if (any(n_p > 0)) {
-      ## tp = 1 if basal
-      tp[index_b] <- 1
-
-      for (i in (n_b + 1):length(tp)) {
-        ## update tp recursively if consumers
-        tp[i] <-  (drop(tp %*% sub_fw)[i]) / n_p[i] + 1
-      }
-
-    } else {
-
-      tp[index_b] <- 1
-
-    }
-
-    fcl <- max(tp)
-    attr(fcl, "tp") <- tp
-  } else {
-    ## no species persist
-    fcl <- 0
-  }
-
-  attr(fcl, "p_hat") <- p_hat
-
-  return(fcl)
-}
-
 #' Numerical solver for equilibrium occupancies
 #'
 #' @inheritParams u_length
@@ -523,4 +406,120 @@ npom <- function(foodweb,
                        rootfun = rootfun)
 
   return(cout)
+}
+
+#' Equilibrium food chain length
+#'
+#' @inheritParams u_length
+#' @inheritParams p_base
+#' @param foodweb Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
+#' @param mu_base Numeric vector of disturbance rates for basal species.
+#' @param mu_cnsm Numeric vector of disturbance rates for consumer species.
+#' @param rho Numeric vector of synchrony probability.
+#'  \code{rho[1]} for basal species;
+#'  \code{rho[2]} for consumers.
+#'
+#' @author Akira Terui, \email{hanabi0111@gmail.com}
+#'
+#' @export
+
+fcl <- function(foodweb,
+                lambda,
+                size,
+                h = 1,
+                delta = c(1, 1),
+                rsrc = 1,
+                g = c(10, 10),
+                mu_base = 1,
+                mu_cnsm = 1,
+                rho = c(0.5, 0.5)) {
+
+  ## foodweb: matrix, consumer-resource matrix. produce with ppm()
+  foodweb <- abs(foodweb)
+  foodweb[lower.tri(foodweb)] <- 0
+
+  ## p_hat: vector, equilibrium occupancy
+  ## max_prey: vector, maximum number of prey items for consumer j
+  p_hat <- rep(-1, ncol(foodweb))
+  max_prey <- colSums(foodweb)
+
+  ## sequential determination of equilibrium occupancies
+  for (j in seq_len(ncol(foodweb))) {
+
+    if (max_prey[j] == 0) {
+      ## basal species
+      p_hat[j] <- p_base(lambda = lambda,
+                         size = size,
+                         h = h,
+                         delta = delta[1],
+                         rsrc = rsrc,
+                         mu = mu_base,
+                         rho = rho[1],
+                         g = g[1])
+
+    } else {
+      ## consumers
+
+      ## index of prey species for consumer j
+      index_prey <- which(foodweb[, j] == 1)
+
+      ## mean-field prey richness
+      prey <- sum(p_hat[index_prey])
+
+      ## possible maximum of prey richness
+      n_prey <- max_prey[j]
+
+      p_hat[j] <- p_cnsm(lambda = lambda,
+                         size = size,
+                         h = h,
+                         delta = delta[2],
+                         prey = prey,
+                         max_prey = n_prey,
+                         mu = mu_cnsm,
+                         rho = rho[2],
+                         g = g[2])
+
+    } # ifelse
+  } # for j
+
+  ## report fcl as the maximum binary trophic position in the landscape
+  if (any(p_hat > 0)) {
+    ## at least one species persist
+
+    ## index of persistent species
+    ## subset the foodweb by persistent species
+    index_p <- which(p_hat > 0)
+    sub_fw <- foodweb[index_p, index_p]
+    tp <- rep(-1, ncol(sub_fw))
+
+    ## index of basal species, number of basal, number of prey
+    index_b <- which(colSums(sub_fw) == 0)
+    n_b <- sum(colSums(sub_fw) == 0)
+    n_p <- colSums(sub_fw)
+
+    if (any(n_p > 0)) {
+      ## tp = 1 if basal
+      tp[index_b] <- 1
+
+      for (i in (n_b + 1):length(tp)) {
+        ## update tp recursively if consumers
+        tp[i] <-  (drop(tp %*% sub_fw)[i]) / n_p[i] + 1
+      }
+
+    } else {
+
+      tp[index_b] <- 1
+
+    }
+
+    fcl <- max(tp)
+    attr(fcl, "tp") <- tp
+  } else {
+    ## no species persist
+    fcl <- 0
+  }
+
+  attr(fcl, "p_hat") <- p_hat
+
+  return(fcl)
 }
