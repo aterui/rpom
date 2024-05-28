@@ -26,14 +26,11 @@ p_mag <- function(m, M) {
 
   if (M <= 500) {
     ## if M <= 500, exact calculation
-    pr_m <- (2 * m - 1)^(-1) *
-      choose(2 * m, m) *
-      choose(2 * (M - m), M - m) / choose(2 * M, M)
+    x <- (2 * m - 1)^(-1) * choose(2 * m, m) * choose(2 * (M - m), M - m)
+    pr_m <- x / choose(2 * M, M)
   } else {
     ## if M > 500, approximation as if M -> infinity
-    pr_m <- 2 ^ (-(2 * m - 1)) *
-      (2 * m - 1) ^ (-1) *
-      choose(2 * m - 1, m)
+    pr_m <- 2 ^ (-(2 * m - 1)) * (2 * m - 1) ^ (-1) * choose(2 * m - 1, m)
   }
 
   return(pr_m)
@@ -56,26 +53,26 @@ u_length <- function(lambda, size) {
   if (size <= 0)
     stop("invalid input: size must be > 0")
 
-  ## z: (number of links/branches) minus 1
-  ## pr_z: probability of b - 1 (= z) links/branches
+  ## z: number of links minus 1
+  ## pr_z: probability of b - 1 (= z) links
   pois_max <- stats::qpois(1 - 1e-10, lambda = lambda * size)
   v_z <- 0:pois_max
   pr_z <- stats::dpois(v_z, lambda = lambda * size)
 
   ## pr_z_tr: truncate probabilities for z taking odd numbers
-  ## (z odd = n links/branches is an even number)
+  ## - note, when z is an odd number, n links is an even number
   even_id <- which(v_z %% 2 == 0)
   odd_id <- which(v_z %% 2 == 1)
   pr_even <- sum(pr_z[even_id])
   pr_z_tr <- pr_z / pr_even
   pr_z_tr[odd_id] <- 0
 
-  ## expected total length of upstream links/branches, conditional on z
+  ## expected total length of upstream links, conditional on z
   u_z <- sapply(v_z, function(z) {
     if (z %% 2 == 0) {
-      ## when z is even = n branches is odd
+      ## when z is even = n links is odd
 
-      ## b: number of links/branches
+      ## b: number of links
       ## l_hat: expected length of a link/branch, conditional on b
       ## - l_hat derived from a Beta distribution Beta(1, z)
       b <- (z + 1)
@@ -89,13 +86,13 @@ u_length <- function(lambda, size) {
                     which will return Inf in choose(2 * M, M);
                     consider smaller values of lambda and/or size"))
 
-      ## weighted values for the number of upstream links/branches
-      ## - `2m - 2` is the number of upstream links/branches, ub
+      ## weighted values for the number of upstream links
+      ## - `2m - 2` is the number of upstream links, ub
       ## - weighted by probability of drawing a link with m magnitude, w_ub
       m <- 1:M
       w_ub <- (2 * m - 2) * p_mag(m, M)
 
-      ## expected value for the number of upstream links ul
+      ## expected value for the number of upstream links ub
       ub_hat <- sum(w_ub)
 
       ## expected value for upstream stream length
@@ -104,7 +101,7 @@ u_length <- function(lambda, size) {
       ## - thus, expectation is (max - min) / 2 = l / 2
       u <- ub_hat * l_hat + 0.5 * l_hat
     } else {
-      ## when z is odd = n branches is even
+      ## when z is odd = n links is even
       u <- -1
     }
 
@@ -362,7 +359,7 @@ fcl <- function(foodweb,
 #' @param mu_p Numeric scalar or vector of prey-induced extinction rates.
 #' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
 #' @param mu_s Numeric scalar or vector of spatial extinction rates.
-#' @param x0 Numeric. Initial occupancies.
+#' @param x0 Numeric. Initial occupancy.
 #' @param n_timestep Integer. Number of time steps.
 #' @param interval Numeric. Interval for numerical solver.
 #' @param threshold Numeric. Threshold value for absorbing condition.

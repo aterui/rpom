@@ -48,7 +48,7 @@ npom(
 
 \item{rho}{Synchrony probability of spatial disturbance.}
 
-\item{x0}{Numeric. Initial occupancies.}
+\item{x0}{Numeric. Initial occupancy.}
 
 \item{n_timestep}{Integer. Number of time steps.}
 
