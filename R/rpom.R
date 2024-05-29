@@ -242,6 +242,7 @@ p_cnsm <- function(lambda,
 #' @param mu_p Numeric scalar or vector of prey-induced extinction rates.
 #' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
 #' @param mu_s Numeric scalar or vector of spatial extinction rates.
+#' @param rho Numeric scalar or vector of synchrony probability of spatial disturbance.
 #' @param x0 Numeric. Initial occupancy.
 #' @param n_timestep Integer. Number of time steps.
 #' @param interval Numeric. Interval for numerical solver.
@@ -419,12 +420,7 @@ npom <- function(foodweb,
 #'
 #' @inheritParams u_length
 #' @inheritParams p_base
-#' @param foodweb Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
-#' @param mu_base Numeric vector of disturbance rates for basal species.
-#' @param mu_cnsm Numeric vector of disturbance rates for consumer species.
-#' @param rho Numeric vector of synchrony probability.
-#'  \code{rho[1]} for basal species;
-#'  \code{rho[2]} for consumers.
+#' @inheritParams npom
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -434,35 +430,64 @@ fcl <- function(foodweb,
                 lambda,
                 size,
                 h = 1,
-                delta = c(1, 1),
+                delta = 1,
                 rsrc = 1,
-                g = c(10, 10),
-                mu_base = 1,
-                mu_cnsm = 1,
-                rho = c(0.5, 0.5)) {
+                g = 10,
+                mu0 = 0.1,
+                mu_p = 0.1,
+                mu_s = 0.1,
+                rho = 0.5) {
+
+  # check input -------------------------------------------------------------
+
+  absfwb <- abs(foodweb)
+  if (!all(absfwb == t(absfwb)))
+    stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
+
+  if (length(rsrc) > 1 || length(h) > 1)
+    stop("rsrc and h must be a scalar")
+
+  # transform input ---------------------------------------------------------
 
   ## foodweb: matrix, consumer-resource matrix. produce with ppm()
-  fwb <- abs(foodweb)
+  fwb <- absfwb
   fwb[lower.tri(fwb)] <- 0
 
-  ## p_hat: vector, equilibrium occupancy
+  ## p_hat: vector initialized with -1, equilibrium occupancy
   ## max_prey: vector, maximum number of prey items for consumer j
   p_hat <- rep(-1, ncol(fwb))
   max_prey <- colSums(fwb)
+
+  ## constant terms, delta, rsrc, g, mu0, mu_p, mu_s, rho
+  n_sp <- unique(dim(foodweb))
+  list_parms <- lapply(list(delta, g, mu0, mu_p, mu_s, rho),
+                       FUN = to_v, n_sp)
+
+  names(list_parms) <- c("delta",
+                         "g",
+                         "mu0",
+                         "mu_p",
+                         "mu_s",
+                         "rho")
+
+
+  # occupancies -------------------------------------------------------------
 
   ## sequential determination of equilibrium occupancies
   for (j in seq_len(ncol(fwb))) {
 
     if (max_prey[j] == 0) {
       ## basal species
-      p_hat[j] <- p_base(lambda = lambda,
-                         size = size,
-                         h = h,
-                         delta = delta[1],
-                         rsrc = rsrc,
-                         mu = mu_base,
-                         rho = rho[1],
-                         g = g[1])
+      p_hat[j] <- with(list_parms,
+                       p_base(lambda = lambda,
+                              size = size,
+                              h = h,
+                              delta = delta[j],
+                              rsrc = rsrc,
+                              mu = c(mu0[j], mu_s[j]),
+                              rho = rho[j],
+                              g = g[j])
+                       )
 
     } else {
       ## consumers
@@ -476,18 +501,23 @@ fcl <- function(foodweb,
       ## possible maximum of prey richness
       n_prey <- max_prey[j]
 
-      p_hat[j] <- p_cnsm(lambda = lambda,
-                         size = size,
-                         h = h,
-                         delta = delta[2],
-                         prey = prey,
-                         max_prey = n_prey,
-                         mu = mu_cnsm,
-                         rho = rho[2],
-                         g = g[2])
+      p_hat[j] <- with(list_parms,
+                       p_cnsm(lambda = lambda,
+                              size = size,
+                              h = h,
+                              delta = delta[j],
+                              prey = prey,
+                              max_prey = n_prey,
+                              mu = c(mu0[j], mu_p[j], mu_s[j]),
+                              rho = rho[j],
+                              g = g[j])
+                       )
 
     } # ifelse
   } # for j
+
+
+  # food chain length -------------------------------------------------------
 
   ## report fcl as the maximum binary trophic position in the landscape
   if (any(p_hat > 0)) {
