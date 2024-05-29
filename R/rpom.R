@@ -268,6 +268,13 @@ npom <- function(foodweb,
                  interval = 0.01,
                  threshold = 1E-5) {
 
+  # check input -------------------------------------------------------------
+
+  absfwb <- abs(foodweb)
+  if (!all(absfwb == t(absfwb)))
+    stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
+
+
   # constant setup ----------------------------------------------------------
 
   ## number of species
