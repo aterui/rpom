@@ -1,0 +1,46 @@
+---
+title: "README: `rpom` package "
+output: github_document
+knit: (function(inputFile, encoding) {
+        rmarkdown::render(inputFile,
+                          encoding = encoding, 
+                          output_dir = here::here())
+      })
+---
+
+# Installation
+
+The `rpom` package can be installed with the following script:
+
+```{r installation, eval = FALSE}
+#install.packages("remotes")
+remotes::install_github("aterui/rpom")
+```
+
+# Overview
+
+The R package `rpom` provides functions to yield analytical/numerical solutions for food chain length in branching river networks.
+
+# Example
+
+`fcl()` returns analytical solution of food chain length with specified values of ecosystem size (`size`) and branching rate (`lambda`).
+This function does not allow any top down effects.
+
+```{r fcl}
+## generate a food web with preferential prey model
+fwb <- mcbrnet::ppm(n_species = 10, n_basal = 3, l = 10, theta = 1)
+
+## fcl
+rpom::fcl(fwb, lambda = 0.1, size = 10)
+
+```
+
+`nfcl()` returns numerical solution of food chain length.
+This function allows top down effects.
+
+```{r nfcl}
+## fcl
+rpom::nfcl(fwb, lambda = 0.1, size = 10)
+
+```
+
