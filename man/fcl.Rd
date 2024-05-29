@@ -9,12 +9,13 @@ fcl(
   lambda,
   size,
   h = 1,
-  delta = c(1, 1),
+  delta = 1,
   rsrc = 1,
-  g = c(10, 10),
-  mu_base = 1,
-  mu_cnsm = 1,
-  rho = c(0.5, 0.5)
+  g = 10,
+  mu0 = 0.1,
+  mu_p = 0.1,
+  mu_s = 0.1,
+  rho = 0.5
 )
 }
 \arguments{
@@ -32,13 +33,13 @@ fcl(
 
 \item{g}{Numeric. Propagule size.}
 
-\item{mu_base}{Numeric vector of disturbance rates for basal species.}
+\item{mu0}{Numeric scalar or vector of base extinction rates.}
 
-\item{mu_cnsm}{Numeric vector of disturbance rates for consumer species.}
+\item{mu_p}{Numeric scalar or vector of prey-induced extinction rates.}
 
-\item{rho}{Numeric vector of synchrony probability.
-\code{rho[1]} for basal species;
-\code{rho[2]} for consumers.}
+\item{mu_s}{Numeric scalar or vector of spatial extinction rates.}
+
+\item{rho}{Numeric scalar or vector of synchrony probability of spatial disturbance.}
 }
 \description{
 Equilibrium food chain length (analytical)

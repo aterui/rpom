@@ -419,7 +419,6 @@ npom <- function(foodweb,
 #' Equilibrium food chain length (analytical)
 #'
 #' @inheritParams u_length
-#' @inheritParams p_base
 #' @inheritParams npom
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
