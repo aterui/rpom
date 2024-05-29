@@ -306,14 +306,14 @@ npom <- function(foodweb,
   # parameter setup ---------------------------------------------------------
 
   ## check inputs
-  l_par <- sapply(list(h, delta, rsrc), function(x) length(x))
+  l_par <- sapply(list(h, rsrc), function(x) length(x))
   if (any(l_par != 1))
-    stop("Invalid length in h, delta, or rsrc.")
+    stop("Invalid length in h or rsrc.")
 
   ## colonization rate
   ## - propagule survival
-  v_h <- to_v(h, n = n_species)
-  v_s <- 1 - exp(-delta * v_h)
+  v_delta <- to_v(delta, n = n_species)
+  v_s <- 1 - exp(-v_delta * h)
 
   ## - resource availability
   r0 <- to_v(rsrc, n = n_b)
@@ -444,8 +444,9 @@ fcl <- function(foodweb,
   if (!all(absfwb == t(absfwb)))
     stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
 
-  if (length(rsrc) > 1 || length(h) > 1)
-    stop("rsrc and h must be a scalar")
+  l_par <- sapply(list(h, rsrc), function(x) length(x))
+  if (any(l_par != 1))
+    stop("Invalid length in h or rsrc.")
 
   # transform input ---------------------------------------------------------
 
@@ -459,6 +460,7 @@ fcl <- function(foodweb,
   max_prey <- colSums(fwb)
 
   ## constant terms, delta, rsrc, g, mu0, mu_p, mu_s, rho
+  ## - create vectors with n-species elements
   n_sp <- unique(dim(foodweb))
   list_parms <- lapply(list(delta, g, mu0, mu_p, mu_s, rho),
                        FUN = to_v, n_sp)
