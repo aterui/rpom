@@ -25,12 +25,13 @@ y <- fcl(foodweb = fwb,
          lambda = lambda_b,
          size = L,
          h = h,
-         delta = rep(delta, 2),
+         delta = delta,
          rsrc = rsrc,
-         g = c(g, g),
-         mu_base = 0,
-         mu_cnsm = 0,
-         rho = c(0, 0))
+         g = g,
+         mu0 = 0,
+         mu_p = 0,
+         mu_s = 0,
+         rho = 0)
 
 # test --------------------------------------------------------------------
 
