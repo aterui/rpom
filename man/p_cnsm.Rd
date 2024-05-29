@@ -34,7 +34,7 @@ p_cnsm(
 \code{mu[2]} = prey rate;
 \code{mu[3]} = spatial rate.}
 
-\item{rho}{Synchrony probability of spatial disturbance.}
+\item{rho}{Synchrony probability of disturbance.}
 
 \item{g}{Numeric. Propagule size.}
 }

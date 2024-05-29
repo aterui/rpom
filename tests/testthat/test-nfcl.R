@@ -5,7 +5,7 @@
 ## - foodweb
 n_sp <- round(runif(1, 1, 10))
 fwb <- matrix(0, n_sp, n_sp)
-for(i in seq_len(nrow(fwb) - 1)) {
+for (i in seq_len(nrow(fwb) - 1)) {
   fwb[i, i + 1] <- 1
 }
 

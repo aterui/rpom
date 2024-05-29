@@ -46,7 +46,7 @@ nfcl(
 
 \item{mu_s}{Numeric scalar or vector of spatial extinction rates.}
 
-\item{rho}{Numeric scalar or vector of synchrony probability of spatial disturbance.}
+\item{rho}{Numeric scalar or vector of synchrony probability of disturbance.}
 
 \item{x0}{Numeric. Initial occupancy.}
 

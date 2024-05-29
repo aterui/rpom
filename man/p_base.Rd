@@ -30,7 +30,7 @@ p_base(
 \code{mu[1]} = base rate;
 \code{mu[2]} = spatial rate}
 
-\item{rho}{Synchrony probability of spatial disturbance.}
+\item{rho}{Synchrony probability of disturbance.}
 
 \item{g}{Numeric. Propagule size.}
 }

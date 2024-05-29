@@ -125,7 +125,7 @@ u_length <- function(lambda, size) {
 #' @param mu Numeric vector of disturbance rates:
 #'  \code{mu[1]} = base rate;
 #'  \code{mu[2]} = spatial rate
-#' @param rho Synchrony probability of spatial disturbance.
+#' @param rho Synchrony probability of disturbance.
 #' @param g Numeric. Propagule size.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
@@ -242,7 +242,7 @@ p_cnsm <- function(lambda,
 #' @param mu_p Numeric scalar or vector of prey-induced extinction rates.
 #' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
 #' @param mu_s Numeric scalar or vector of spatial extinction rates.
-#' @param rho Numeric scalar or vector of synchrony probability of spatial disturbance.
+#' @param rho Numeric scalar or vector of synchrony probability of disturbance.
 #' @param x0 Numeric. Initial occupancy.
 #' @param n_timestep Integer. Number of time steps.
 #' @param interval Numeric. Interval for numerical solver.
@@ -654,4 +654,3 @@ nfcl <- function(foodweb,
 
   return(fcl)
 }
-
