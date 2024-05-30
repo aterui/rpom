@@ -274,6 +274,8 @@ npom <- function(foodweb,
   if (!all(absfwb == t(absfwb)))
     stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
 
+  if (any(!(absfwb %in% c(0, 1))))
+    stop("the input foodweb is invalid (abs(foodweb) must be binary)")
 
   # constant setup ----------------------------------------------------------
 
@@ -441,6 +443,9 @@ fcl <- function(foodweb,
   absfwb <- abs(foodweb)
   if (!all(absfwb == t(absfwb)))
     stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
+
+  if (any(!(absfwb %in% c(0, 1))))
+    stop("the input foodweb is invalid (abs(foodweb) must be binary)")
 
   l_par <- sapply(list(h, rsrc), function(x) length(x))
   if (any(l_par != 1))
