@@ -39,7 +39,7 @@ cout <- npom(foodweb = fwb,
              mu_s = mu_s,
              rho = rho)
 
-print(y0 <- c(cout[nrow(cout), -1]))
+y0 <- c(cout[nrow(cout), -1])
 names(y0) <- NULL
 
 ## analytical

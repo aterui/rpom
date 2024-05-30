@@ -20,7 +20,9 @@ nfcl(
   x0 = 0.5,
   n_timestep = 100,
   interval = 0.01,
-  threshold = 1e-05
+  threshold = 1e-05,
+  n_plus = 10,
+  weight = TRUE
 )
 }
 \arguments{
@@ -55,6 +57,11 @@ nfcl(
 \item{interval}{Numeric. Interval for numerical solver.}
 
 \item{threshold}{Numeric. Threshold value for absorbing condition.}
+
+\item{n_plus}{Number of additional runs to check convergence to equilibrium.}
+
+\item{weight}{Logical.
+If \code{TRUE}, maximum trophic position is weighted by relative occupancies.}
 }
 \description{
 Equilibrium food chain length (numerical)

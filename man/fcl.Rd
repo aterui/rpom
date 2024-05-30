@@ -15,7 +15,8 @@ fcl(
   mu0 = 0.1,
   mu_p = 0.1,
   mu_s = 0.1,
-  rho = 0.5
+  rho = 0.5,
+  weight = TRUE
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ fcl(
 \item{mu_s}{Numeric scalar or vector of spatial extinction rates.}
 
 \item{rho}{Numeric scalar or vector of synchrony probability of disturbance.}
+
+\item{weight}{Logical.
+If \code{TRUE}, maximum trophic position is weighted by relative occupancies.}
 }
 \description{
 Equilibrium food chain length (analytical)
