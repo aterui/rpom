@@ -390,7 +390,7 @@ npom <- function(foodweb,
                 rho = v_rho,
                 u = u)
 
-  x_init <- rep(x0, n_species)
+  x_init <- to_v(x0, n_species)
   times <- seq(0, n_timestep, by = interval)
 
   ## define absorbing condition
@@ -421,6 +421,8 @@ npom <- function(foodweb,
 #'
 #' @inheritParams u_length
 #' @inheritParams npom
+#' @param weight Logical.
+#'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -436,7 +438,8 @@ fcl <- function(foodweb,
                 mu0 = 0.1,
                 mu_p = 0.1,
                 mu_s = 0.1,
-                rho = 0.5) {
+                rho = 0.5,
+                weight = TRUE) {
 
   # check input -------------------------------------------------------------
 
@@ -457,11 +460,6 @@ fcl <- function(foodweb,
   fwb <- absfwb
   fwb[lower.tri(fwb)] <- 0
 
-  ## p_hat: vector initialized with -1, equilibrium occupancy
-  ## max_prey: vector, maximum number of prey items for consumer j
-  p_hat <- rep(-1, ncol(fwb))
-  max_prey <- colSums(fwb)
-
   ## constant terms, delta, rsrc, g, mu0, mu_p, mu_s, rho
   ## - create vectors with n-species elements
   n_sp <- unique(dim(foodweb))
@@ -475,11 +473,15 @@ fcl <- function(foodweb,
                          "mu_s",
                          "rho")
 
+  ## p_hat: vector initialized with -1, equilibrium occupancy
+  ## max_prey: vector, maximum number of prey items for consumer j
+  p_hat <- rep(-1, n_sp)
+  max_prey <- colSums(fwb)
 
   # occupancies -------------------------------------------------------------
 
   ## sequential determination of equilibrium occupancies
-  for (j in seq_len(ncol(fwb))) {
+  for (j in seq_len(n_sp)) {
 
     if (max_prey[j] == 0) {
       ## basal species
@@ -524,42 +526,9 @@ fcl <- function(foodweb,
 
   # food chain length -------------------------------------------------------
 
-  ## report fcl as the maximum binary trophic position in the landscape
-  if (any(p_hat > 0)) {
-    ## at least one species persist
-
-    ## index of persistent species
-    ## subset the foodweb by persistent species
-    index_p <- which(p_hat > 0)
-    sub_fw <- as.matrix(fwb[index_p, index_p])
-    tp <- rep(-1, ncol(sub_fw))
-
-    ## index of basal species, number of basal, number of prey
-    index_b <- which(colSums(sub_fw) == 0)
-    n_b <- sum(colSums(sub_fw) == 0)
-    n_p <- colSums(sub_fw)
-
-    if (any(n_p > 0)) {
-      ## tp = 1 if basal
-      tp[index_b] <- 1
-
-      for (i in (n_b + 1):length(tp)) {
-        ## update tp recursively if consumers
-        tp[i] <-  (drop(tp %*% sub_fw)[i]) / n_p[i] + 1
-      }
-
-    } else {
-
-      tp[index_b] <- 1
-
-    }
-
-    fcl <- max(tp)
-    attr(fcl, "tp") <- tp
-  } else {
-    ## no species persist
-    fcl <- 0
-  }
+  fcl <- maxtp(foodweb = foodweb,
+               occupancy = p_hat,
+               weight = weight)
 
   attr(fcl, "p_hat") <- p_hat
 
@@ -571,7 +540,9 @@ fcl <- function(foodweb,
 #'
 #' @inheritParams u_length
 #' @inheritParams npom
-#' @param foodweb Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
+#' @param n_plus Number of additional runs to check convergence to equilibrium.
+#' @param weight Logical.
+#'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -592,9 +563,13 @@ nfcl <- function(foodweb,
                  x0 = 0.5,
                  n_timestep = 100,
                  interval = 0.01,
-                 threshold = 1E-5) {
+                 threshold = 1E-5,
+                 n_plus = 10,
+                 weight = TRUE) {
 
-  ## numerical simulation
+  # numerical solution ------------------------------------------------------
+
+  ## main run
   cout <- npom(foodweb = foodweb,
                lambda = lambda,
                size = size,
@@ -614,45 +589,36 @@ nfcl <- function(foodweb,
 
   p_hat <- cout[nrow(cout), -1]
 
-  ## report fcl as the maximum binary trophic position in the landscape
-  fwb <- abs(foodweb)
-  fwb[lower.tri(fwb)] <- 0
+  ## additional run to check equilibrium
+  cout_plus <- npom(foodweb = foodweb,
+                    lambda = lambda,
+                    size = size,
+                    h = h,
+                    delta = delta,
+                    rsrc = rsrc,
+                    g = g,
+                    mu0 = mu0,
+                    mu_p = mu_p,
+                    mu_c = mu_c,
+                    mu_s = mu_s,
+                    rho = rho,
+                    x0 = c(p_hat),
+                    n_timestep = n_plus,
+                    interval = interval,
+                    threshold = threshold)
 
-  if (any(p_hat > 0)) {
-    ## at least one species persist
+  p_hat_plus <- cout_plus[nrow(cout_plus), -1]
 
-    ## index of persistent species
-    ## subset the foodweb by persistent species
-    index_p <- which(p_hat > 0)
-    sub_fw <- as.matrix(fwb[index_p, index_p])
-    tp <- rep(-1, ncol(sub_fw))
+  ## check difference
+  z <- abs(p_hat - p_hat_plus)
+  if (any(z > 1E-6))
+    warning("Simulation may not have reached equilibrium")
 
-    ## index of basal species, number of basal, number of prey
-    index_b <- which(colSums(sub_fw) == 0)
-    n_b <- sum(colSums(sub_fw) == 0)
-    n_p <- colSums(sub_fw)
+  # food chain length -------------------------------------------------------
 
-    if (any(n_p > 0)) {
-      ## tp = 1 if basal
-      tp[index_b] <- 1
-
-      for (i in (n_b + 1):length(tp)) {
-        ## update tp recursively if consumers
-        tp[i] <-  (drop(tp %*% sub_fw)[i]) / n_p[i] + 1
-      }
-
-    } else {
-
-      tp[index_b] <- 1
-
-    }
-
-    fcl <- max(tp)
-    attr(fcl, "tp") <- tp
-  } else {
-    ## no species persist
-    fcl <- 0
-  }
+  fcl <- maxtp(foodweb = foodweb,
+               occupancy = p_hat,
+               weight = weight)
 
   attr(fcl, "p_hat") <- p_hat
 
