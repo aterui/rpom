@@ -176,8 +176,8 @@ p_base <- function(lambda,
 #'
 #' @inheritParams u_length
 #' @inheritParams p_base
-#' @param prey Resource availability for basal species.
-#' @param max_prey Resource availability for basal species.
+#' @param prey Prey availability for consumer species.
+#' @param max_prey Species richness of possible prey.
 #' @param mu Numeric vector of disturbance rates.
 #'  \code{mu[1]} = base rate;
 #'  \code{mu[2]} = prey rate;
