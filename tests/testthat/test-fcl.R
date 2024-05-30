@@ -12,7 +12,7 @@ for (i in seq_len(nrow(fwb) - 1)) {
 fwb <- fwb + t(fwb)
 
 ## - ecosystem structure
-L <- runif(1, 10, 100)
+rl <- runif(1, 10, 100)
 lambda_b <- runif(1, 0.1, 1)
 h <- delta <- 1
 
@@ -23,7 +23,7 @@ g <- runif(1, 1, 10)
 ## analytical
 y <- fcl(foodweb = fwb,
          lambda = lambda_b,
-         size = L,
+         size = rl,
          h = h,
          delta = delta,
          rsrc = rsrc,

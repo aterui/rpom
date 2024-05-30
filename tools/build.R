@@ -24,4 +24,4 @@ lintr::lint_package()
 #usethis::use_pkgdown()
 
 # Run to build the website
-pkgdown::build_site()
+#pkgdown::build_site()

@@ -25,9 +25,9 @@ p_cnsm(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{prey}{Resource availability for basal species.}
+\item{prey}{Prey availability for consumer species.}
 
-\item{max_prey}{Resource availability for basal species.}
+\item{max_prey}{Species richness of possible prey.}
 
 \item{mu}{Numeric vector of disturbance rates.
 \code{mu[1]} = base rate;

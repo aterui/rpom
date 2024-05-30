@@ -7,7 +7,7 @@ fwb <- matrix(1, 2, 2)
 diag(fwb) <- 0
 
 ## - ecosystem structure
-L <- runif(1, 10, 100)
+rl <- runif(1, 10, 100)
 lambda_b <- runif(1, 0.1, 1)
 h <- delta <- 1
 
@@ -27,7 +27,7 @@ rho <- 0
 
 ## numerical
 cout <- npom(foodweb = fwb,
-             size = L,
+             size = rl,
              lambda = lambda_b,
              h = h,
              delta = delta,
@@ -43,7 +43,7 @@ print(y0 <- c(cout[nrow(cout), -1]))
 names(y0) <- NULL
 
 ## analytical
-y <- p_base(size = L,
+y <- p_base(size = rl,
             lambda = lambda_b,
             h = h,
             delta = delta,
