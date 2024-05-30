@@ -163,8 +163,7 @@ p_base <- function(lambda,
 
   ## equilibrium patch occupancy
   if (extn == 0 && clnz == 0)
-    stop("colonization and extinction rates are both zero;
-         equilibrium undefined.")
+    stop("colonization and extinction rates are both zero; equilibrium undefined.")
 
   p_hat <- 1 - (extn / clnz)
   p_hat <- ifelse(p_hat > 0, p_hat, 0)
