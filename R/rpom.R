@@ -142,7 +142,7 @@ p_base <- function(lambda,
   ## check input
   l_par <- sapply(list(h, delta, rsrc, mu, rho, g), length)
 
-  if(any(l_par > 1))
+  if (any(l_par > 1))
     stop("invalid parameter input")
 
   ## n_patch: scalar, # habitat patches
@@ -198,7 +198,7 @@ p_cnsm <- function(lambda,
   ## check input
   l_par <- sapply(list(h, delta, rho, g), length)
 
-  if(any(l_par > 1))
+  if (any(l_par > 1))
     stop("invalid parameter input")
 
   ## n_patch: scalar, # habitat patches
