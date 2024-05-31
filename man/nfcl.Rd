@@ -15,7 +15,6 @@ nfcl(
   mu0 = 1,
   mu_p = 1,
   mu_c = 1,
-  mu_s = 1,
   rho = 0.5,
   x0 = 0.5,
   n_timestep = 100,
@@ -36,7 +35,7 @@ nfcl(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Resource availability for basal species.}
+\item{rsrc}{Numeric. Resource availability for basal species.}
 
 \item{g}{Numeric. Propagule size.}
 
@@ -45,8 +44,6 @@ nfcl(
 \item{mu_p}{Numeric scalar or vector of prey-induced extinction rates.}
 
 \item{mu_c}{Numeric scalar or vector of consumer-induced extinction rates.}
-
-\item{mu_s}{Numeric scalar or vector of spatial extinction rates.}
 
 \item{rho}{Numeric scalar or vector of synchrony probability of disturbance.}
 

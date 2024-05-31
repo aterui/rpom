@@ -4,16 +4,7 @@
 \alias{p_base}
 \title{Equilibrium occupancy for basal species}
 \usage{
-p_base(
-  lambda,
-  size,
-  h = 1,
-  delta = 1,
-  rsrc = 1,
-  mu = c(1, 1),
-  rho = 0.5,
-  g = 100
-)
+p_base(lambda, size, h = 1, delta = 1, rsrc = 1, mu = 1, rho = 0.5, g = 10)
 }
 \arguments{
 \item{lambda}{Numeric. Branching rate of a network.}
@@ -24,13 +15,11 @@ p_base(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Resource availability for basal species.}
+\item{rsrc}{Numeric. Resource availability for basal species.}
 
-\item{mu}{Numeric vector of disturbance rates:
-\code{mu[1]} = base rate;
-\code{mu[2]} = spatial rate}
+\item{mu}{Numeric. Disturbance rate.}
 
-\item{rho}{Synchrony probability of disturbance.}
+\item{rho}{Numeric. Synchrony probability of disturbance.}
 
 \item{g}{Numeric. Propagule size.}
 }

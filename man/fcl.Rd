@@ -14,7 +14,6 @@ fcl(
   g = 10,
   mu0 = 0.1,
   mu_p = 0.1,
-  mu_s = 0.1,
   rho = 0.5,
   weight = TRUE
 )
@@ -30,15 +29,13 @@ fcl(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Resource availability for basal species.}
+\item{rsrc}{Numeric. Resource availability for basal species.}
 
 \item{g}{Numeric. Propagule size.}
 
 \item{mu0}{Numeric scalar or vector of base extinction rates.}
 
 \item{mu_p}{Numeric scalar or vector of prey-induced extinction rates.}
-
-\item{mu_s}{Numeric scalar or vector of spatial extinction rates.}
 
 \item{rho}{Numeric scalar or vector of synchrony probability of disturbance.}
 

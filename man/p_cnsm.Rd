@@ -11,9 +11,9 @@ p_cnsm(
   delta = 1,
   prey,
   max_prey,
-  mu = c(1, 1, 1),
+  mu = 1,
   rho = 0.5,
-  g = 100
+  g = 10
 )
 }
 \arguments{
@@ -25,16 +25,15 @@ p_cnsm(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{prey}{Prey availability for consumer species.}
+\item{prey}{Numeric. Prey availability for consumer species.}
 
-\item{max_prey}{Species richness of possible prey.}
+\item{max_prey}{Numeric. Species richness of possible prey.}
 
 \item{mu}{Numeric vector of disturbance rates.
 \code{mu[1]} = base rate;
-\code{mu[2]} = prey rate;
-\code{mu[3]} = spatial rate.}
+\code{mu[2]} = prey-induced rate;}
 
-\item{rho}{Synchrony probability of disturbance.}
+\item{rho}{Numeric. Synchrony probability of disturbance.}
 
 \item{g}{Numeric. Propagule size.}
 }
