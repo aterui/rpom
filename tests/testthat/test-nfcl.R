@@ -29,7 +29,6 @@ y <- nfcl(foodweb = fwb,
           rsrc = rsrc,
           g = g,
           mu0 = 0,
-          mu_s = 0,
           mu_p = 0,
           mu_c = 0,
           rho = 0)

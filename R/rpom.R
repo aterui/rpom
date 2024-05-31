@@ -121,11 +121,9 @@ u_length <- function(lambda, size) {
 #' @inheritParams u_length
 #' @param h Numeric. Habitat patch density (or rate) per unit distance.
 #' @param delta Numeric. Species' dispersal capability.
-#' @param rsrc Resource availability for basal species.
-#' @param mu Numeric vector of disturbance rates:
-#'  \code{mu[1]} = base rate;
-#'  \code{mu[2]} = spatial rate
-#' @param rho Synchrony probability of disturbance.
+#' @param rsrc Numeric. Resource availability for basal species.
+#' @param mu Numeric. Disturbance rate.
+#' @param rho Numeric. Synchrony probability of disturbance.
 #' @param g Numeric. Propagule size.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
@@ -137,29 +135,30 @@ p_base <- function(lambda,
                    h = 1,
                    delta = 1,
                    rsrc = 1,
-                   mu = c(1, 1),
+                   mu = 1,
                    rho = 0.5,
-                   g = 100) {
+                   g = 10) {
+
+  ## check input
+  l_par <- sapply(list(h, delta, rsrc, mu, rho, g), length)
+
+  if(any(l_par > 1))
+    stop("invalid parameter input")
 
   ## n_patch: scalar, # habitat patches
   n_patch <- h * size
 
-  ## clnz: colonization rate
   ## - s: scalar, survival probability during migration
   s <- 1 - exp(- delta * h)
   pgle <- ifelse(s * g < n_patch,
                  yes = s * g,
                  no = n_patch)
+
+  ## clnz: colonization rate
   clnz <- rsrc * pgle
 
   ## extn: extinction rate
-  if (length(mu) == 1) {
-    mu <- rep(mu, 2)
-  } else {
-    if (length(mu) != 2) stop("error in mu")
-  }
-
-  extn <- mu[1] + mu[2] * rho * u_length(lambda = lambda, size = size)
+  extn <- mu * (1 + rho * u_length(lambda = lambda, size = size))
 
   ## equilibrium patch occupancy
   if (extn == 0 && clnz == 0)
@@ -176,12 +175,11 @@ p_base <- function(lambda,
 #'
 #' @inheritParams u_length
 #' @inheritParams p_base
-#' @param prey Prey availability for consumer species.
-#' @param max_prey Species richness of possible prey.
+#' @param prey Numeric. Prey availability for consumer species.
+#' @param max_prey Numeric. Species richness of possible prey.
 #' @param mu Numeric vector of disturbance rates.
 #'  \code{mu[1]} = base rate;
-#'  \code{mu[2]} = prey rate;
-#'  \code{mu[3]} = spatial rate.
+#'  \code{mu[2]} = prey-induced rate;
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -193,38 +191,39 @@ p_cnsm <- function(lambda,
                    delta = 1,
                    prey,
                    max_prey,
-                   mu = c(1, 1, 1),
+                   mu = 1,
                    rho = 0.5,
-                   g = 100) {
+                   g = 10) {
+
+  ## check input
+  l_par <- sapply(list(h, delta, rho, g), length)
+
+  if(any(l_par > 1))
+    stop("invalid parameter input")
 
   ## n_patch: scalar, # habitat patches
   n_patch <- h * size
 
-  ## clnz: colonization rate
-  ## - s: scalar, survival probability during migration
+  ## s: scalar, survival probability during migration
   s <- 1 - exp(-delta * h)
 
   pgle <- ifelse(s * g < n_patch,
                  yes = s * g,
                  no = n_patch)
 
+  ## clnz: colonization rate
   clnz <- prey * pgle
 
   ## extn: extinction rate
-  if (length(mu) == 1) {
-    mu <- rep(mu, 3)
-  } else {
-    if (length(mu) != 3) stop("error in mu")
-  }
+  v_mu <- to_v(mu, 2)
 
-  extn <- mu[1] +
-    mu[2] * (1 - (prey / max_prey)) +
-    mu[3] * rho * u_length(lambda = lambda, size = size)
+  extn <-
+    v_mu[1] * (1 + rho * u_length(lambda = lambda, size = size)) +
+    v_mu[2] * (1 - (prey / max_prey))
 
   ## equilibrium patch occupancy
   if (extn == 0 && clnz == 0)
-    stop("colonization and extinction rates are both zero;
-         equilibrium undefined.")
+    stop("colonization and extinction rates are both zero; equilibrium undefined.")
 
   p_hat <- 1 - (extn / clnz)
   p_hat <- ifelse(p_hat > 0, p_hat, 0)
@@ -240,7 +239,6 @@ p_cnsm <- function(lambda,
 #' @param mu0 Numeric scalar or vector of base extinction rates.
 #' @param mu_p Numeric scalar or vector of prey-induced extinction rates.
 #' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
-#' @param mu_s Numeric scalar or vector of spatial extinction rates.
 #' @param rho Numeric scalar or vector of synchrony probability of disturbance.
 #' @param x0 Numeric. Initial occupancy.
 #' @param n_timestep Integer. Number of time steps.
@@ -261,7 +259,6 @@ npom <- function(foodweb,
                  mu0 = 1,
                  mu_p = 1,
                  mu_c = 1,
-                 mu_s = 1,
                  rho = 0.5,
                  x0 = 0.5,
                  n_timestep = 100,
@@ -356,7 +353,6 @@ npom <- function(foodweb,
   }
 
   ## - spatial
-  v_mu_s <- to_v(mu_s, n = n_species)
   v_rho <- to_v(rho, n = n_species)
   u <- u_length(lambda = lambda, size = size)
 
@@ -366,11 +362,16 @@ npom <- function(foodweb,
   derivr <- function(t, x, parms) {
     with(parms, {
 
-      dx <- phi * (Mp %*% x + r) * x * (1 - x) -
-        (mu0 +
-           mu_p * (1 - (Mp %*% x) * inv_s_prey) +
-           mu_c * Mc %*% x +
-           mu_s * rho * u) * x
+      ## - colonization
+      clnz <- phi * (Mp %*% x + r)
+
+      ## - extinction
+      extn <-
+        mu0 * (1 + rho * u) +
+        mu_p * (1 - (Mp %*% x) * inv_s_prey) +
+        mu_c * Mc %*% x
+
+      dx <- clnz * x * (1 - x) - extn * x
 
       list(dx)
     })
@@ -386,7 +387,6 @@ npom <- function(foodweb,
                 inv_s_prey = inv_s_prey,
                 mu_c = m_mu_c,
                 Mc = Mc,
-                mu_s = v_mu_s,
                 rho = v_rho,
                 u = u)
 
@@ -437,7 +437,6 @@ fcl <- function(foodweb,
                 g = 10,
                 mu0 = 0.1,
                 mu_p = 0.1,
-                mu_s = 0.1,
                 rho = 0.5,
                 weight = TRUE) {
 
@@ -460,17 +459,16 @@ fcl <- function(foodweb,
   fwb <- absfwb
   fwb[lower.tri(fwb)] <- 0
 
-  ## constant terms, delta, rsrc, g, mu0, mu_p, mu_s, rho
+  ## constant terms, delta, rsrc, g, mu0, mu_p, rho
   ## - create vectors with n-species elements
   n_sp <- unique(dim(foodweb))
-  list_parms <- lapply(list(delta, g, mu0, mu_p, mu_s, rho),
+  list_parms <- lapply(list(delta, g, mu0, mu_p, rho),
                        FUN = to_v, n_sp)
 
   names(list_parms) <- c("delta",
                          "g",
                          "mu0",
                          "mu_p",
-                         "mu_s",
                          "rho")
 
   ## p_hat: vector initialized with -1, equilibrium occupancy
@@ -491,7 +489,7 @@ fcl <- function(foodweb,
                               h = h,
                               delta = delta[j],
                               rsrc = rsrc,
-                              mu = c(mu0[j], mu_s[j]),
+                              mu = mu0[j],
                               rho = rho[j],
                               g = g[j])
                        )
@@ -515,7 +513,7 @@ fcl <- function(foodweb,
                               delta = delta[j],
                               prey = prey,
                               max_prey = n_prey,
-                              mu = c(mu0[j], mu_p[j], mu_s[j]),
+                              mu = c(mu0[j], mu_p[j]),
                               rho = rho[j],
                               g = g[j])
                        )
@@ -558,7 +556,6 @@ nfcl <- function(foodweb,
                  mu0 = 1,
                  mu_p = 1,
                  mu_c = 1,
-                 mu_s = 1,
                  rho = 0.5,
                  x0 = 0.5,
                  n_timestep = 100,
@@ -580,7 +577,6 @@ nfcl <- function(foodweb,
                mu0 = mu0,
                mu_p = mu_p,
                mu_c = mu_c,
-               mu_s = mu_s,
                rho = rho,
                x0 = x0,
                n_timestep = n_timestep,
@@ -600,7 +596,6 @@ nfcl <- function(foodweb,
                     mu0 = mu0,
                     mu_p = mu_p,
                     mu_c = mu_c,
-                    mu_s = mu_s,
                     rho = rho,
                     x0 = c(p_hat),
                     n_timestep = n_plus,
