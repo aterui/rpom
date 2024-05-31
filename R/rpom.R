@@ -541,6 +541,12 @@ fcl <- function(foodweb,
 #' @param n_plus Number of additional runs to check convergence to equilibrium.
 #' @param weight Logical.
 #'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
+#' @param tol Numeric.
+#'  Tolerance value for convergence.
+#'  If the difference in the final values of
+#'  the main and additional runs is less than the tolerance value,
+#'  the function returns successful convergence as \code{0}
+#'  in attribute "convergence," otherwise \code{1}.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -560,9 +566,10 @@ nfcl <- function(foodweb,
                  x0 = 0.5,
                  n_timestep = 100,
                  interval = 0.01,
-                 threshold = 1E-5,
+                 threshold = 1e-05,
                  n_plus = 10,
-                 weight = TRUE) {
+                 weight = TRUE,
+                 tol = 1e-06) {
 
   # numerical solution ------------------------------------------------------
 
@@ -606,16 +613,19 @@ nfcl <- function(foodweb,
 
   ## check difference
   z <- abs(p_hat - p_hat_plus)
-  if (any(z > 1E-6))
-    warning("Simulation may not have reached equilibrium")
+  conv <- ifelse(any(z > tol), 1, 0)
 
   # food chain length -------------------------------------------------------
+
+  ## in case npom() returns zeros as non-zero values (e.g, 1e-30)
+  if (threshold > 0) p_hat <- floor(p_hat / threshold) * threshold
 
   fcl <- maxtp(foodweb = foodweb,
                occupancy = p_hat,
                weight = weight)
 
   attr(fcl, "p_hat") <- p_hat
+  attr(fcl, "convergence") <- conv
 
   return(fcl)
 }

@@ -21,7 +21,8 @@ nfcl(
   interval = 0.01,
   threshold = 1e-05,
   n_plus = 10,
-  weight = TRUE
+  weight = TRUE,
+  tol = 1e-06
 )
 }
 \arguments{
@@ -59,6 +60,13 @@ nfcl(
 
 \item{weight}{Logical.
 If \code{TRUE}, maximum trophic position is weighted by relative occupancies.}
+
+\item{tol}{Numeric.
+Tolerance value for convergence.
+If the difference in the final values of
+the main and additional runs is less than the tolerance value,
+the function returns successful convergence as \code{0}
+in attribute "convergence," otherwise \code{1}.}
 }
 \description{
 Equilibrium food chain length (numerical)

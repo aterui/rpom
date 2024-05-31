@@ -57,9 +57,11 @@ test_that("fcl() = nfcl() with linear food web", {
              mu_c = 0,
              rho = 0,
              n_timestep = 250,
-             weight = TRUE)
+             weight = TRUE,
+             threshold = 1e-5)
 
-  expect_equal(c(y1), c(y2))
+  expect_equal(c(round(y1, 5)),
+               c(round(y2, 5)))
 })
 
 test_that("fcl() = nfcl() with omnivory", {
@@ -90,7 +92,9 @@ test_that("fcl() = nfcl() with omnivory", {
              mu_c = 0,
              rho = 0,
              n_timestep = 250,
-             weight = TRUE)
+             weight = TRUE,
+             threshold = 1e-5)
 
-  expect_equal(c(y1), c(y2))
+  expect_equal(c(round(y1, 5)),
+               c(round(y2, 5)))
 })
