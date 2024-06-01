@@ -140,9 +140,16 @@ p_base <- function(lambda,
                    g = 10) {
 
   ## check input
-  l_par <- sapply(list(h, delta, rsrc, mu, rho, g), length)
+  l_par <- sapply(list(h, delta, rsrc, mu, rho, g),
+                  function(x) length(x) > 1)
 
-  if (any(l_par > 1))
+  v_par <- sapply(list(h, delta, mu, g),
+                  function(x) x < 0)
+
+  v_zero_one <- sapply(list(rsrc, rho),
+                       function(x) x < 0 || x > 1)
+
+  if (any(c(l_par, v_par, v_zero_one)))
     stop("invalid parameter input")
 
   ## n_patch: scalar, # habitat patches
@@ -196,10 +203,18 @@ p_cnsm <- function(lambda,
                    g = 10) {
 
   ## check input
-  l_par <- sapply(list(h, delta, rho, g), length)
+  l_par <- sapply(list(h, delta, rho, g, max_prey),
+                  function(x) length(x) > 1)
 
-  if (any(l_par > 1))
+  v_par <- sapply(list(h, delta, g, max_prey),
+                  function(x) x < 0)
+
+  v_zero_one <- sapply(list(rho),
+                       function(x) x < 0 || x > 1)
+
+  if (any(c(l_par, v_par, v_zero_one)))
     stop("invalid parameter input")
+
 
   ## n_patch: scalar, # habitat patches
   n_patch <- h * size
@@ -212,7 +227,7 @@ p_cnsm <- function(lambda,
                  no = n_patch)
 
   ## clnz: colonization rate
-  clnz <- prey * pgle
+  clnz <- (prey / max_prey) * pgle
 
   ## extn: extinction rate
   v_mu <- to_v(mu, 2)
