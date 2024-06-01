@@ -476,9 +476,6 @@ fcl <- function(foodweb,
   if (any(!(absfwb %in% c(0, 1))))
     stop("the input foodweb is invalid (abs(foodweb) must be binary)")
 
-  l_par <- sapply(list(h, rsrc), function(x) length(x))
-  if (any(l_par != 1))
-    stop("Invalid length in h or rsrc.")
 
   # transform input ---------------------------------------------------------
 
