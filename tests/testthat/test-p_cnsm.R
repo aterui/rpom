@@ -12,7 +12,7 @@ lambda_b <- runif(1, 0.1, 1)
 h <- delta <- 1
 
 ## - resource and propagules
-rsrc <- runif(1, 1, 10)
+rsrc <- runif(1, 0, 1)
 g <- runif(1, 1, 10)
 
 ## - extinction rates
