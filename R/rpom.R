@@ -121,7 +121,7 @@ u_length <- function(lambda, size) {
 #' @inheritParams u_length
 #' @param h Numeric. Habitat patch density (or rate) per unit distance.
 #' @param delta Numeric. Species' dispersal capability.
-#' @param rsrc Numeric. Resource availability for basal species.
+#' @param rsrc Numeric. Establishment probability for basal species.
 #' @param mu Numeric. Disturbance rate.
 #' @param rho Numeric. Synchrony probability of disturbance.
 #' @param g Numeric. Propagule size.

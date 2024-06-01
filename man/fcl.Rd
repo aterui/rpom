@@ -29,7 +29,7 @@ fcl(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Numeric. Resource availability for basal species.}
+\item{rsrc}{Numeric. Establishment probability for basal species.}
 
 \item{g}{Numeric. Propagule size.}
 

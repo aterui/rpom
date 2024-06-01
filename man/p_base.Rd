@@ -15,7 +15,7 @@ p_base(lambda, size, h = 1, delta = 1, rsrc = 1, mu = 1, rho = 0.5, g = 10)
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Numeric. Resource availability for basal species.}
+\item{rsrc}{Numeric. Establishment probability for basal species.}
 
 \item{mu}{Numeric. Disturbance rate.}
 
