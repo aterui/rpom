@@ -289,6 +289,18 @@ npom <- function(foodweb,
   if (any(!(absfwb %in% c(0, 1))))
     stop("the input foodweb is invalid (abs(foodweb) must be binary)")
 
+  l_par <- sapply(list(h, rho, rsrc, g),
+                  function(x) length(x) > 1)
+
+  v_par <- sapply(list(h, delta, rsrc, g, mu0, mu_p, mu_c),
+                  function(x) x < 0)
+
+  v_zero_one <- sapply(list(rho, x0),
+                       function(x) x < 0 || x > 1)
+
+  if (any(c(l_par, v_par, v_zero_one)))
+    stop("invalid parameter input")
+
   # constant setup ----------------------------------------------------------
 
   ## number of species
@@ -378,7 +390,7 @@ npom <- function(foodweb,
     with(parms, {
 
       ## - colonization
-      clnz <- phi * (Mp %*% x + r)
+      clnz <- phi * ((Mp %*% x) * inv_s_prey + r)
 
       ## - extinction
       extn <-
