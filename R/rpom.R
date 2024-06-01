@@ -330,11 +330,6 @@ npom <- function(foodweb,
 
   # parameter setup ---------------------------------------------------------
 
-  ## check inputs
-  l_par <- sapply(list(h, rsrc), function(x) length(x))
-  if (any(l_par != 1))
-    stop("Invalid length in h or rsrc.")
-
   ## colonization rate
   ## - propagule survival
   v_delta <- to_v(delta, n = n_species)
