@@ -62,6 +62,6 @@ y <- p_cnsm(size = rl,
 
 # test --------------------------------------------------------------------
 
-test_that("p_base = npom output", {
+test_that("p_cnsm = npom output", {
   expect_equal(round(y, 5), round(y0[2], 5))
 })
