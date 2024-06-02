@@ -144,10 +144,10 @@ p_base <- function(lambda,
                   function(x) length(x) > 1)
 
   v_par <- sapply(list(h, delta, mu, g),
-                  function(x) x < 0)
+                  function(x) any(x < 0))
 
   v_zero_one <- sapply(list(rsrc, rho),
-                       function(x) x < 0 || x > 1)
+                       function(x) any(x < 0) || any(x > 1))
 
   if (any(c(l_par, v_par, v_zero_one)))
     stop("invalid parameter input")
@@ -203,14 +203,14 @@ p_cnsm <- function(lambda,
                    g = 10) {
 
   ## check input
-  l_par <- sapply(list(h, delta, rho, g, max_prey),
+  l_par <- sapply(list(h, delta, rho, g, prey, max_prey),
                   function(x) length(x) > 1)
 
-  v_par <- sapply(list(h, delta, g, max_prey),
-                  function(x) x < 0)
+  v_par <- sapply(list(h, delta, g, prey, max_prey),
+                  function(x) any(x < 0))
 
   v_zero_one <- sapply(list(rho),
-                       function(x) x < 0 || x > 1)
+                       function(x) any(x < 0) || any(x > 1))
 
   if (any(c(l_par, v_par, v_zero_one)))
     stop("invalid parameter input")
@@ -293,7 +293,7 @@ npom <- function(foodweb,
                   function(x) length(x) > 1)
 
   v_par <- sapply(list(h, delta, rsrc, g, mu0, mu_p, mu_c),
-                  function(x) x < 0)
+                  function(x) any(x < 0))
 
   v_zero_one <- sapply(list(rho, x0),
                        function(x) any(x < 0) || any(x > 1))
