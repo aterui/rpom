@@ -610,6 +610,8 @@ nfcl <- function(foodweb,
                threshold = threshold)
 
   p_hat <- cout[nrow(cout), -1]
+  p_hat[p_hat < 0] <- 0
+  p_hat[p_hat > 1] <- 1
 
   ## additional run to check equilibrium
   cout_plus <- npom(foodweb = foodweb,
