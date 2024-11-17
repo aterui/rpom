@@ -28,7 +28,7 @@ This function does not allow any top down effects.
 
 ```{r fcl}
 ## generate a food web with preferential prey model
-fwb <- mcbrnet::ppm(n_species = 10, n_basal = 3, l = 10, theta = 1)
+fwb <- ecotools::ppm(n_species = 10, n_basal = 3, l = 10, theta = 1)
 
 ## fcl
 rpom::fcl(fwb, lambda = 0.1, size = 10)
