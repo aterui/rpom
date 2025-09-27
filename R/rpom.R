@@ -260,7 +260,7 @@ p_cnsm <- function(lambda,
 #'
 #' @inheritParams u_length
 #' @inheritParams p_base
-#' @param foodweb Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
+#' @param w Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
 #' @param mu0 Numeric scalar or vector of base extinction rates.
 #' @param mu_p Numeric scalar or vector of prey-induced extinction rates.
 #' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
@@ -274,7 +274,7 @@ p_cnsm <- function(lambda,
 #'
 #' @export
 
-npom <- function(foodweb,
+npom <- function(w,
                  size,
                  lambda,
                  h = 1,
@@ -292,12 +292,12 @@ npom <- function(foodweb,
 
   # check input -------------------------------------------------------------
 
-  absfwb <- abs(foodweb)
+  absfwb <- abs(w)
   if (!all(absfwb == t(absfwb)))
-    stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
+    stop("the input w is invalid (abs(w) must be symmetric)")
 
   if (any(!(absfwb %in% c(0, 1))))
-    stop("the input foodweb is invalid (abs(foodweb) must be binary)")
+    stop("the input w is invalid (abs(w) must be binary)")
 
   l_par <- sapply(list(h, rsrc),
                   function(x) length(x) > 1)
@@ -314,10 +314,10 @@ npom <- function(foodweb,
   # constant setup ----------------------------------------------------------
 
   ## number of species
-  n_species <- nrow(foodweb)
+  n_species <- nrow(m)
 
   ## prey (Mp) and consumption (Mc) matrix
-  Mp <- Mc <- abs(foodweb)
+  Mp <- Mc <- abs(m)
   Mp[upper.tri(Mp)] <- 0
   Mc[lower.tri(Mc)] <- 0
 
@@ -460,7 +460,7 @@ npom <- function(foodweb,
 #'
 #' @export
 
-fcl <- function(foodweb,
+fcl <- function(w,
                 lambda,
                 size,
                 h = 1,
@@ -474,23 +474,23 @@ fcl <- function(foodweb,
 
   # check input -------------------------------------------------------------
 
-  absfwb <- abs(foodweb)
+  absfwb <- abs(w)
   if (!all(absfwb == t(absfwb)))
-    stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
+    stop("the input w is invalid (abs(w) must be symmetric)")
 
   if (any(!(absfwb %in% c(0, 1))))
-    stop("the input foodweb is invalid (abs(foodweb) must be binary)")
+    stop("the input w is invalid (abs(w) must be binary)")
 
 
   # transform input ---------------------------------------------------------
 
-  ## foodweb: matrix, consumer-resource matrix. produce with ppm()
+  ## w: matrix, consumer-resource matrix. produce with ppm()
   fwb <- absfwb
   fwb[lower.tri(fwb)] <- 0
 
   ## constant terms, delta, rsrc, g, mu0, mu_p, rho
   ## - create vectors with n-species elements
-  n_sp <- unique(dim(foodweb))
+  n_sp <- unique(dim(w))
   list_parms <- lapply(list(delta, g, mu0, mu_p, rho),
                        FUN = to_v, n_sp)
 
@@ -553,7 +553,7 @@ fcl <- function(foodweb,
 
   # food chain length -------------------------------------------------------
 
-  fcl <- maxtp(foodweb = foodweb,
+  fcl <- maxtp(w = w,
                occupancy = p_hat,
                weight = weight)
 
@@ -581,7 +581,7 @@ fcl <- function(foodweb,
 #'
 #' @export
 
-nfcl <- function(foodweb,
+nfcl <- function(w,
                  lambda,
                  size,
                  h = 1,
@@ -603,7 +603,7 @@ nfcl <- function(foodweb,
   # numerical solution ------------------------------------------------------
 
   ## main run
-  cout <- npom(foodweb = foodweb,
+  cout <- npom(w = w,
                lambda = lambda,
                size = size,
                h = h,
@@ -624,7 +624,7 @@ nfcl <- function(foodweb,
   p_hat[p_hat > 1] <- 1
 
   ## additional run to check equilibrium
-  cout_plus <- npom(foodweb = foodweb,
+  cout_plus <- npom(w = w,
                     lambda = lambda,
                     size = size,
                     h = h,
@@ -651,7 +651,7 @@ nfcl <- function(foodweb,
   ## in case npom() returns zeros as non-zero values (e.g, 1e-30)
   if (threshold > 0) p_hat <- floor(p_hat / threshold) * threshold
 
-  fcl <- maxtp(foodweb = foodweb,
+  fcl <- maxtp(w = w,
                occupancy = p_hat,
                weight = weight)
 
