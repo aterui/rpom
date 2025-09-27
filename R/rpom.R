@@ -269,6 +269,7 @@ p_cnsm <- function(lambda,
 #' @param n_timestep Integer. Number of time steps.
 #' @param interval Numeric. Interval for numerical solver.
 #' @param threshold Numeric. Threshold value for absorbing condition.
+#' @param ... Additional arguments for \code{deSolve::ode()}
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -280,6 +281,7 @@ npom <- function(w,
                  h = 1,
                  delta = 1,
                  rsrc = 1,
+                 zeta = 0,
                  g = 1,
                  mu0 = 1,
                  mu_p = 1,
@@ -288,7 +290,8 @@ npom <- function(w,
                  x0 = 0.5,
                  n_timestep = 100,
                  interval = 0.01,
-                 threshold = 1E-5) {
+                 threshold = 1E-5,
+                 ...) {
 
   # check input -------------------------------------------------------------
 
@@ -340,14 +343,24 @@ npom <- function(w,
 
   # parameter setup ---------------------------------------------------------
 
+  ## spatial parameters
+  v_rho <- to_v(rho, n = n_species)
+  u <- u_length(lambda = lambda, size = size)
+
   ## colonization rate
   ## - propagule survival
   v_delta <- to_v(delta, n = n_species)
   v_s <- 1 - exp(-v_delta * h)
 
   ## - resource availability
-  r0 <- to_v(rsrc, n = n_b)
-  v_r <- c(r0, rep(0, n_c))
+  v_zeta <- to_v(zeta, n = n_b)
+  v_rsrc <- to_v(rsrc, n = n_b)
+  v_p_r <- v_rsrc + v_zeta * u
+  v_r0 <- sapply(v_p_r,
+                 function(y) max(min(c(y, 1)), 0)
+                 )
+
+  v_r <- c(v_r0, rep(0, n_c))
 
   ## - propagule
   n_patch <- h * size
@@ -383,10 +396,6 @@ npom <- function(w,
 
     m_mu_c <- to_v(mu_c, n = n_species)
   }
-
-  ## - spatial
-  v_rho <- to_v(rho, n = n_species)
-  u <- u_length(lambda = lambda, size = size)
 
   # run ode -----------------------------------------------------------------
 
@@ -444,7 +453,8 @@ npom <- function(w,
                        parms = parms,
                        events = list(func = eventfun,
                                      root = TRUE),
-                       rootfun = rootfun)
+                       rootfun = rootfun,
+                       ...)
 
   return(cout)
 }
