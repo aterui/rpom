@@ -373,15 +373,15 @@ npom <- function(foodweb,
   if (is.matrix(mu_c)) {
     ## - if matrix
     if (any(dim(mu_c) != n_species))
-      stop(paste("mu_c must be", n_species, "x", n_species, "matrix"))
+      stop(paste("if mu_c is a matrix, its dimensions must be", n_species, "x", n_species))
 
     m_mu_c <- mu_c
   } else {
     ## - if non-matrix
-    if (length(mu_c) != 1)
-      stop("mu_c must be a scalar or matrix")
+    if (!(length(mu_c) == 1 || length(mu_c) == n_species))
+      stop("if mu_c is non-matrix, it must be a scalar or have a length of n_species")
 
-    m_mu_c <- mu_c
+    m_mu_c <- to_v(mu_c, n = n_species)
   }
 
   ## - spatial
