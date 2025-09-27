@@ -27,7 +27,7 @@ to_v <- function(x, n) {
 
 #' Utility: get maximum trophic position
 #'
-#' @param foodweb Binary food web matrix.
+#' @param w Binary food web matrix.
 #' @param occupancy Equilibrium occupancies of constituent species
 #' @param weight Logical.
 #'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
@@ -36,22 +36,22 @@ to_v <- function(x, n) {
 #'
 #' @export
 
-maxtp <- function(foodweb,
+maxtp <- function(w,
                   occupancy,
                   weight = TRUE) {
 
   # check input -------------------------------------------------------------
 
-  absfwb <- abs(foodweb)
+  absfwb <- abs(w)
 
   if (!all(absfwb == t(absfwb)))
-    stop("the input foodweb is invalid (abs(foodweb) must be symmetric)")
+    stop("the input w is invalid (abs(w) must be symmetric)")
 
   if (any(!(absfwb %in% c(0, 1))))
-    stop("the input foodweb is invalid (abs(foodweb) must be binary)")
+    stop("the input w is invalid (abs(w) must be binary)")
 
-  if (any(length(occupancy) != dim(foodweb)))
-    stop("the input foodweb or occupancy has invalid dimension.")
+  if (any(length(occupancy) != dim(w)))
+    stop("the input w or occupancy has invalid dimension.")
 
   # trophic position --------------------------------------------------------
 
@@ -60,7 +60,7 @@ maxtp <- function(foodweb,
 
     ## declare objects
     ## - v_id_p, index of persisting species
-    ## - m_sub_fwb, subset the foodweb by persisting species,
+    ## - m_sub_fwb, subset the w by persisting species,
     ## -- then empty lower triangle
     ## - v_tp, initialize trophic position vector
     v_id_p <- which(occupancy > 0)
