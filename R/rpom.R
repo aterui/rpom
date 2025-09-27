@@ -320,10 +320,10 @@ npom <- function(w,
   # constant setup ----------------------------------------------------------
 
   ## number of species
-  n_species <- nrow(m)
+  n_species <- nrow(absfwb)
 
   ## prey (Mp) and consumption (Mc) matrix
-  Mp <- Mc <- abs(m)
+  Mp <- Mc <- absfwb
   Mp[upper.tri(Mp)] <- 0
   Mc[lower.tri(Mc)] <- 0
 
