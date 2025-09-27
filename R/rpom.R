@@ -476,6 +476,7 @@ fcl <- function(w,
                 h = 1,
                 delta = 1,
                 rsrc = 1,
+                zeta = 0,
                 g = 10,
                 mu0 = 0.1,
                 mu_p = 0.1,
@@ -497,23 +498,35 @@ fcl <- function(w,
   ## w: matrix, consumer-resource matrix. produce with ppm()
   fwb <- absfwb
   fwb[lower.tri(fwb)] <- 0
+  max_prey <- colSums(fwb)
 
-  ## constant terms, delta, rsrc, g, mu0, mu_p, rho
+  ## constant terms, rsrc, zeta for basal species
+  ## - create vectors with n-basal elements
+  n_b <- sum(max_prey == 0)
+  list_b <- lapply(list(rsrc, zeta),
+                   FUN = function(x) to_v(x, n = n_b))
+
+  names(list_b) <- c("rsrc",
+                     "zeta")
+
+
+  ## constant terms, delta, g, mu0, mu_p, rho
   ## - create vectors with n-species elements
   n_sp <- unique(dim(w))
-  list_parms <- lapply(list(delta, g, mu0, mu_p, rho),
-                       FUN = to_v, n_sp)
+  list_all <- lapply(list(delta, g, mu0, mu_p, rho),
+                     FUN = function(x) to_v(x, n = n_sp))
 
-  names(list_parms) <- c("delta",
-                         "g",
-                         "mu0",
-                         "mu_p",
-                         "rho")
+  names(list_all) <- c("delta",
+                       "g",
+                       "mu0",
+                       "mu_p",
+                       "rho")
+
+  list_parms <- c(list_b, list_all)
 
   ## p_hat: vector initialized with -1, equilibrium occupancy
   ## max_prey: vector, maximum number of prey items for consumer j
   p_hat <- rep(-1, n_sp)
-  max_prey <- colSums(fwb)
 
   # occupancies -------------------------------------------------------------
 
@@ -527,7 +540,8 @@ fcl <- function(w,
                               size = size,
                               h = h,
                               delta = delta[j],
-                              rsrc = rsrc,
+                              rsrc = rsrc[j],
+                              zeta = zeta[j],
                               mu = mu0[j],
                               rho = rho[j],
                               g = g[j])
