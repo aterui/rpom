@@ -5,12 +5,13 @@
 \title{Equilibrium food chain length (numerical)}
 \usage{
 nfcl(
-  foodweb,
+  w,
   lambda,
   size,
   h = 1,
   delta = 1,
   rsrc = 1,
+  zeta = 0,
   g = 10,
   mu0 = 1,
   mu_p = 1,
@@ -22,11 +23,12 @@ nfcl(
   threshold = 1e-05,
   n_plus = 10,
   weight = TRUE,
-  tol = 1e-06
+  tol = 1e-06,
+  ...
 )
 }
 \arguments{
-\item{foodweb}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
+\item{w}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
 
 \item{lambda}{Numeric. Branching rate of a network.}
 
@@ -36,7 +38,9 @@ nfcl(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Numeric. Establishment probability for basal species.}
+\item{rsrc}{Numeric. Minimum establishment probability for basal species.}
+
+\item{zeta}{Numeric. Effect of stream size on establishment probability for basal species.}
 
 \item{g}{Numeric. Propagule size.}
 
@@ -67,6 +71,8 @@ If the difference in the final values of
 the main and additional runs is less than the tolerance value,
 the function returns successful convergence as \code{0}
 in attribute "convergence," otherwise \code{1}.}
+
+\item{...}{Additional arguments for \code{deSolve::ode()}}
 }
 \description{
 Equilibrium food chain length (numerical)

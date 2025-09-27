@@ -5,12 +5,13 @@
 \title{Numerical solver for equilibrium occupancies}
 \usage{
 npom(
-  foodweb,
+  w,
   size,
   lambda,
   h = 1,
   delta = 1,
   rsrc = 1,
+  zeta = 0,
   g = 1,
   mu0 = 1,
   mu_p = 1,
@@ -19,11 +20,12 @@ npom(
   x0 = 0.5,
   n_timestep = 100,
   interval = 0.01,
-  threshold = 1e-05
+  threshold = 1e-05,
+  ...
 )
 }
 \arguments{
-\item{foodweb}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
+\item{w}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
 
 \item{size}{Numeric. Total length of a network.}
 
@@ -33,7 +35,9 @@ npom(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Numeric. Establishment probability for basal species.}
+\item{rsrc}{Numeric. Minimum establishment probability for basal species.}
+
+\item{zeta}{Numeric. Effect of stream size on establishment probability for basal species.}
 
 \item{g}{Numeric. Propagule size.}
 
@@ -52,6 +56,8 @@ npom(
 \item{interval}{Numeric. Interval for numerical solver.}
 
 \item{threshold}{Numeric. Threshold value for absorbing condition.}
+
+\item{...}{Additional arguments for \code{deSolve::ode()}}
 }
 \description{
 Numerical solver for equilibrium occupancies

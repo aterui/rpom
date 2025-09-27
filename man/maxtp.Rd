@@ -4,10 +4,10 @@
 \alias{maxtp}
 \title{Utility: get maximum trophic position}
 \usage{
-maxtp(foodweb, occupancy, weight = TRUE)
+maxtp(w, occupancy, weight = TRUE)
 }
 \arguments{
-\item{foodweb}{Binary food web matrix.}
+\item{w}{Binary food web matrix.}
 
 \item{occupancy}{Equilibrium occupancies of constituent species}
 

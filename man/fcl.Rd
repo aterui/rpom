@@ -5,12 +5,13 @@
 \title{Equilibrium food chain length (analytical)}
 \usage{
 fcl(
-  foodweb,
+  w,
   lambda,
   size,
   h = 1,
   delta = 1,
   rsrc = 1,
+  zeta = 0,
   g = 10,
   mu0 = 0.1,
   mu_p = 0.1,
@@ -19,7 +20,7 @@ fcl(
 )
 }
 \arguments{
-\item{foodweb}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
+\item{w}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
 
 \item{lambda}{Numeric. Branching rate of a network.}
 
@@ -29,7 +30,9 @@ fcl(
 
 \item{delta}{Numeric. Species' dispersal capability.}
 
-\item{rsrc}{Numeric. Establishment probability for basal species.}
+\item{rsrc}{Numeric. Minimum establishment probability for basal species.}
+
+\item{zeta}{Numeric. Effect of stream size on establishment probability for basal species.}
 
 \item{g}{Numeric. Propagule size.}
 
