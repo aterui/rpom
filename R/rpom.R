@@ -121,7 +121,8 @@ u_length <- function(lambda, size) {
 #' @inheritParams u_length
 #' @param h Numeric. Habitat patch density (or rate) per unit distance.
 #' @param delta Numeric. Species' dispersal capability.
-#' @param rsrc Numeric. Establishment probability for basal species.
+#' @param rsrc Numeric. Minimum establishment probability for basal species.
+#' @param zeta Numeric. Effect of stream size on establishment probability for basal species.
 #' @param mu Numeric. Disturbance rate.
 #' @param rho Numeric. Synchrony probability of disturbance.
 #' @param g Numeric. Propagule size.
@@ -134,7 +135,8 @@ p_base <- function(lambda,
                    size,
                    h = 1,
                    delta = 1,
-                   rsrc = 1,
+                   rsrc = 0.1,
+                   zeta = 0,
                    mu = 1,
                    rho = 0.5,
                    g = 10) {
@@ -152,6 +154,9 @@ p_base <- function(lambda,
   if (any(c(l_par, v_par, v_zero_one)))
     stop("invalid parameter input")
 
+  ## define upstream river length
+  u <- u_length(lambda = lambda, size = size)
+
   ## n_patch: scalar, # habitat patches
   n_patch <- h * size
 
@@ -161,11 +166,16 @@ p_base <- function(lambda,
                  yes = s * g,
                  no = n_patch)
 
+  ## - stream size dependency in establishment prob.
+  ## - establishment probability changes with u, but truncated at zero and one
+  p_r <- rsrc + zeta * u
+  r0 <- max(min(c(p_r, 1)), 0)
+
   ## clnz: colonization rate
-  clnz <- rsrc * pgle
+  clnz <- r0 * pgle
 
   ## extn: extinction rate
-  extn <- mu * (1 + rho * u_length(lambda = lambda, size = size))
+  extn <- mu * (1 + rho * u)
 
   ## equilibrium patch occupancy
   if (extn == 0 && clnz == 0)
