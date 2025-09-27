@@ -225,15 +225,18 @@ p_cnsm <- function(lambda,
   if (any(c(l_par, v_par, v_zero_one)))
     stop("invalid parameter input")
 
+  ## define upstream river length
+  u <- u_length(lambda = lambda, size = size)
 
   ## n_patch: scalar, # habitat patches
   n_patch <- h * size
 
   ## s: scalar, survival probability during migration
   s <- 1 - exp(-delta * h)
+  sxg <- s * g
 
-  pgle <- ifelse(s * g < n_patch,
-                 yes = s * g,
+  pgle <- ifelse(sxg < n_patch,
+                 yes = sxg,
                  no = n_patch)
 
   ## clnz: colonization rate
@@ -242,9 +245,7 @@ p_cnsm <- function(lambda,
   ## extn: extinction rate
   v_mu <- to_v(mu, 2)
 
-  extn <-
-    v_mu[1] * (1 + rho * u_length(lambda = lambda, size = size)) +
-    v_mu[2] * (1 - (prey / max_prey))
+  extn <- v_mu[1] * (1 + rho * u) + v_mu[2] * (1 - (prey / max_prey))
 
   ## equilibrium patch occupancy
   if (extn == 0 && clnz == 0)
