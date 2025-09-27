@@ -614,6 +614,7 @@ nfcl <- function(w,
                  h = 1,
                  delta = 1,
                  rsrc = 1,
+                 zeta = 0,
                  g = 10,
                  mu0 = 1,
                  mu_p = 1,
@@ -625,7 +626,8 @@ nfcl <- function(w,
                  threshold = 1e-05,
                  n_plus = 10,
                  weight = TRUE,
-                 tol = 1e-06) {
+                 tol = 1e-06,
+                 ...) {
 
   # numerical solution ------------------------------------------------------
 
@@ -636,6 +638,7 @@ nfcl <- function(w,
                h = h,
                delta = delta,
                rsrc = rsrc,
+               zeta = zeta,
                g = g,
                mu0 = mu0,
                mu_p = mu_p,
@@ -644,7 +647,8 @@ nfcl <- function(w,
                x0 = x0,
                n_timestep = n_timestep,
                interval = interval,
-               threshold = threshold)
+               threshold = threshold,
+               ...)
 
   p_hat <- cout[nrow(cout), -1]
   p_hat[p_hat < 0] <- 0
@@ -657,6 +661,7 @@ nfcl <- function(w,
                     h = h,
                     delta = delta,
                     rsrc = rsrc,
+                    zeta = zeta,
                     g = g,
                     mu0 = mu0,
                     mu_p = mu_p,
