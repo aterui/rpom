@@ -365,14 +365,14 @@ npom <- function(w,
   ## - propagule
   n_patch <- h * size
   v_g <- to_v(g, n = n_species)
-  v_phi <- rep(NA, n_species)
+  v_pgle <- rep(NA, n_species)
 
   v_sxg <- v_s * v_g
 
   id_sxg <- which(v_sxg < n_patch)
   id_n_patch <- which(v_sxg >= n_patch)
-  v_phi[id_sxg] <- v_sxg[id_sxg]
-  v_phi[id_n_patch] <- n_patch
+  v_pgle[id_sxg] <- v_sxg[id_sxg]
+  v_pgle[id_n_patch] <- n_patch
 
   ## extinction rate
   ## - base rate
@@ -404,7 +404,7 @@ npom <- function(w,
     with(parms, {
 
       ## - colonization
-      clnz <- phi * ((Mp %*% x) * inv_s_prey + r)
+      clnz <- pgle * ((Mp %*% x) * inv_s_prey + r)
 
       ## - extinction
       extn <-
@@ -419,7 +419,7 @@ npom <- function(w,
   }
 
   ## set parameters for ode()
-  parms <- list(phi = v_phi,
+  parms <- list(pgle = v_pgle,
                 g = v_g,
                 Mp = Mp,
                 r = v_r,
