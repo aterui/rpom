@@ -22,6 +22,7 @@ h <- delta <- 1
 ## - resource and propagules
 rsrc <- runif(1, 0, 1)
 g <- runif(1, 1, 10)
+zeta <- 1 / rl
 
 ## - extinction rates
 mu0 <- runif(1, 0, 1.5)
@@ -32,12 +33,13 @@ mu_p <- runif(1, 0, 1.5)
 test_that("fcl() = nfcl() with linear food web", {
 
   ## analytical
-  y1 <- fcl(foodweb = fwbl,
+  y1 <- fcl(w = fwbl,
             lambda = lambda_b,
             size = rl,
             h = h,
             delta = delta,
             rsrc = rsrc,
+            zeta = zeta,
             g = g,
             mu0 = mu0,
             mu_p = mu_p,
@@ -45,12 +47,13 @@ test_that("fcl() = nfcl() with linear food web", {
             weight = TRUE)
 
   ## numerical
-  y2 <- nfcl(foodweb = fwbl,
+  y2 <- nfcl(w = fwbl,
              lambda = lambda_b,
              size = rl,
              h = h,
              delta = delta,
              rsrc = rsrc,
+             zeta = zeta,
              g = g,
              mu0 = mu0,
              mu_p = mu_p,
@@ -67,12 +70,13 @@ test_that("fcl() = nfcl() with linear food web", {
 test_that("fcl() = nfcl() with omnivory", {
 
   ## analytical
-  y1 <- fcl(foodweb = fwb,
+  y1 <- fcl(w = fwb,
             lambda = lambda_b,
             size = rl,
             h = h,
             delta = delta,
             rsrc = rsrc,
+            zeta = zeta,
             g = g,
             mu0 = mu0,
             mu_p = mu_p,
@@ -80,12 +84,13 @@ test_that("fcl() = nfcl() with omnivory", {
             weight = TRUE)
 
   ## numerical
-  y2 <- nfcl(foodweb = fwb,
+  y2 <- nfcl(w = fwb,
              lambda = lambda_b,
              size = rl,
              h = h,
              delta = delta,
              rsrc = rsrc,
+             zeta = zeta,
              g = g,
              mu0 = mu0,
              mu_p = mu_p,

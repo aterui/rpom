@@ -14,6 +14,7 @@ h <- delta <- 1
 ## - resource and propagules
 rsrc <- runif(1, 0.5, 1)
 g <- runif(1, 1, 10)
+zeta <- 1 / rl
 
 ## - extinction rates
 mu0 <- runif(1, 0, 0.1)
@@ -25,12 +26,13 @@ mu_c <- runif(1, 0.1, 1)
 rho <- 0
 
 ## numerical
-cout <- npom(foodweb = fwb,
+cout <- npom(w = fwb,
              size = rl,
              lambda = lambda_b,
              h = h,
              delta = delta,
              rsrc = rsrc,
+             zeta = zeta,
              g = g,
              mu0 = mu0,
              mu_p = mu_p,
@@ -48,6 +50,7 @@ y_base <- p_base(size = rl,
                  h = h,
                  delta = delta,
                  rsrc = rsrc,
+                 zeta = zeta,
                  g = g,
                  mu = mu0,
                  rho = rho)
@@ -57,7 +60,7 @@ y_cnsm <- p_cnsm(size = rl,
                  h = h,
                  delta = delta,
                  prey = y_base,
-                 max_prey = sum(fwb[,2]),
+                 max_prey = sum(fwb[, 2]),
                  g = g,
                  mu = c(mu0, mu_p),
                  rho = rho)

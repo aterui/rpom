@@ -19,14 +19,16 @@ h <- delta <- 1
 ## - resource and propagules
 rsrc <- runif(1, 0, 1)
 g <- runif(1, 1, 10)
+zeta <- 1 / rl
 
 ## numerical
-y <- nfcl(foodweb = fwb,
+y <- nfcl(w = fwb,
           lambda = lambda_b,
           size = rl,
           h = h,
           delta = delta,
           rsrc = rsrc,
+          zeta = zeta,
           g = g,
           mu0 = 0,
           mu_p = 0,

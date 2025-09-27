@@ -21,7 +21,7 @@ rsrc <- runif(1, 0, 1)
 g <- runif(1, 1, 10)
 
 ## analytical
-y <- fcl(foodweb = fwb,
+y <- fcl(w = fwb,
          lambda = lambda_b,
          size = rl,
          h = h,
