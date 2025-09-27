@@ -410,8 +410,7 @@ npom <- function(w,
       clnz <- pgle * ((Mp %*% x) * inv_s_prey + r)
 
       ## - extinction
-      extn <-
-        mu0 * (1 + rho * u) +
+      extn <- mu0 * (1 + rho * u) +
         mu_p * (1 - (Mp %*% x) * inv_s_prey) +
         mu_c * Mc %*% x
 
