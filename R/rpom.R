@@ -162,8 +162,10 @@ p_base <- function(lambda,
 
   ## - s: scalar, survival probability during migration
   s <- 1 - exp(- delta * h)
-  pgle <- ifelse(s * g < n_patch,
-                 yes = s * g,
+  sxg <- s * g
+
+  pgle <- ifelse(sxg < n_patch,
+                 yes = sxg,
                  no = n_patch)
 
   ## - stream size dependency in establishment prob.
