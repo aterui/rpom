@@ -47,8 +47,8 @@ p_mag <- function(m, M, exact = TRUE) {
 
 #' Calculate the expected value of upstream river length
 #'
-#' @param lambda Numeric. Branching rate of a network.
-#' @param size Numeric. Total length of a network.
+#' @param lambda Numeric. Branching rate.
+#' @param size Numeric. Total network length.
 #' @param exact Logical. If FALSE, use the asymptotic approximation.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
