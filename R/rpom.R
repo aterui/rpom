@@ -65,43 +65,16 @@ u_length <- function(lambda, size, exact = TRUE) {
 
   if (exact) {
     ## z: number of links minus 1
-    ## pr_z: probability of b - 1 (= z) links
-    pois_max <- stats::qpois(1 - 1e-10, lambda = lambda * size)
-    v_z <- 0:pois_max
-    pr_z <- stats::dpois(v_z, lambda = lambda * size)
+    ## pz: probability of b - 1 (= z) links
+    m_pz <- cpois(lambda = lambda, size = size)
+    z <- m_pz[ ,"z"]
+    pz <- m_pz[, "pz"]
 
-    ## pz: truncate probabilities for z taking even numbers
-    ## - note, when z is an even number, n links is an odd number
-    even <- (v_z %% 2 == 0)
-    pr_even <- even * pr_z
-    pz <- pr_even / sum(pr_even)
+    n_z <- exp((z + 2) * log(2) - lchoose(z + 2, 0.5 * (z + 2))) - 2
+    l_z <- size / (z + 1)
+    u_z <- l_z * (n_z + 0.5)
 
-    ## expected total length of upstream links, conditional on z
-    u_z <- numeric(length(v_z))
-    v_z_even <- v_z[even]
-
-    for (i in seq_along(v_z_even)) {
-
-      ## realized number of links
-      zz <- v_z_even[i]
-      b <- zz + 1
-
-      ## mean link length
-      l_hat <- size / b
-
-      ## network-wide magnitude
-      M <- 0.5 * (b + 1)
-
-      ## expected number of upstream links
-      m <- 1:M
-      w_ub <- (2 * m - 2) * p_mag(m, M, exact = TRUE)
-      ub_hat <- sum(w_ub)
-
-      ## expected river length given z
-      u_z[v_z == zz] <- ub_hat * l_hat + 0.5 * l_hat
-    }
-
-    u_hat <- sum(pz * u_z)
+    u_hat <- sum(u_z * pz)
   } else {
     ## order of approximation is ^-1/2
     u_hat <- sqrt(pi / 2) * sqrt(size / lambda) - (3 / 2) * (1 / lambda)
@@ -109,6 +82,7 @@ u_length <- function(lambda, size, exact = TRUE) {
 
   return(u_hat)
 }
+
 
 #' Calculate the expected value of network diameter
 #'
