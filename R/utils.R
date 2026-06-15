@@ -2,28 +2,20 @@
 #'
 #' @param x value(s)
 #' @param n number of replicates
-#'
-#' @author Akira Terui, \email{hanabi0111@gmail.com}
-#'
 #' @export
 
 to_v <- function(x, n) {
 
-  if (length(x) == 1) {
-
-    v_x <- rep(x, n)
-
-  } else {
-
-    if (n != length(x))
-      stop("incorrect input in one or more of the parameters")
-
-    v_x <- x
+  if (length(x) == 1L) {
+    return(rep(x, n))
   }
 
-  return(v_x)
-}
+  if (length(x) != n) {
+    stop("length(x) must be 1 or equal to n")
+  }
 
+  x
+}
 
 #' Utility: get maximum trophic position
 #'
