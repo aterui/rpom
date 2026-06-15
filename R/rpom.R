@@ -1,15 +1,14 @@
-#' Calculate a probability of drawing a link with m magnitude
+#' Calculate the probability of drawing a link of magnitude m
 #'
-#' @param m Integer. Magnitude of a given link.
-#' @param M Integer. Magnitude of a network.
-#'
-#' @importFrom stats dpois qpois
+#' @param m Integer vector of link magnitudes.
+#' @param M Integer network magnitude.
+#' @param exact Logical. If FALSE, use the asymptotic approximation.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
 #' @export
 
-p_mag <- function(m, M) {
+p_mag <- function(m, M, exact = TRUE) {
 
   # check inputs ------------------------------------------------------------
 
@@ -17,20 +16,30 @@ p_mag <- function(m, M) {
     stop("M must be >= m")
 
   if (any(m <= 0) || M <= 0)
-    stop("m and M must be positive integer")
+    stop("m and M must be positive")
+
+  if (any(m %% 1 != 0) || M %% 1 != 0)
+    stop("m and M must be integers")
 
   if (length(M) > 1)
     stop("M must be a scalar")
 
   # probability calculation -------------------------------------------------
 
-  if (M <= 500) {
-    ## if M <= 500, exact calculation
-    x <- (2 * m - 1)^(-1) * choose(2 * m, m) * choose(2 * (M - m), M - m)
-    pr_m <- x / choose(2 * M, M)
+  if (exact) {
+    # exact probability
+    pr_m <- exp(
+      -log(2 * m - 1) +
+        lchoose(2 * m, m) +
+        lchoose(2 * (M - m), M - m) -
+        lchoose(2 * M, M)
+    )
   } else {
-    ## if M > 500, approximation as if M -> infinity
-    pr_m <- 2 ^ (-(2 * m - 1)) * (2 * m - 1) ^ (-1) * choose(2 * m - 1, m)
+    ## use Stirling's formula for the central binomial coefficient
+    pr_m <- exp(
+      -(1 / (8 * m)) +
+        (1 / (192 * m^3))
+    ) / ((2 * m - 1) * sqrt(pi * m))
   }
 
   return(pr_m)
