@@ -110,6 +110,32 @@ u_length <- function(lambda, size, exact = TRUE) {
   return(u_hat)
 }
 
+#' Calculate the expected value of network diameter
+#'
+#' @param lambda Numeric. Branching rate.
+#' @param size Numeric. Total network length.
+#' @param exact Logical. If FALSE, use the asymptotic approximation.
+#'
+#' @author Akira Terui, \email{hanabi0111@gmail.com}
+#'
+#' @export
+
+diameter <- function(lambda, size, exact = TRUE) {
+
+  if (exact) {
+    m_pz <- cpois(lambda = lambda, size = size)
+    z <- m_pz[ ,"z"]
+    pz <- m_pz[, "pz"]
+
+    log_v <- log(size) - log(z + 2) + (z + 2) * log(2) - lchoose(z + 2, 0.5 * (z + 2))
+    d <- sum(exp(log_v) * pz)
+  } else {
+    d <- sqrt(pi/2) * sqrt(size / lambda)
+  }
+
+  return(d)
+}
+
 
 #' Equilibrium occupancy for basal species
 #'
