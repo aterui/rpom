@@ -57,11 +57,8 @@ p_mag <- function(m, M, exact = TRUE) {
 
 u_length <- function(lambda, size, exact = TRUE) {
 
-  if (lambda < 0)
-    stop("lambda must be >= 0")
-
-  if (size <= 0)
-    stop("size must be > 0")
+  if (any(c(lambda, size) <= 0))
+    stop("lambda and size must be > 0")
 
   if (exact) {
     ## z: number of links minus 1
