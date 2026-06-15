@@ -92,6 +92,9 @@ u_length <- function(lambda, size, exact = TRUE) {
 
 diameter <- function(lambda, size, exact = TRUE) {
 
+  if (any(c(lambda, size) <= 0))
+    stop("lambda and size must be > 0")
+
   if (exact) {
     m_pz <- cpois(lambda = lambda, size = size)
     z <- m_pz[ ,"z"]
@@ -117,6 +120,9 @@ diameter <- function(lambda, size, exact = TRUE) {
 #' @export
 
 pdist <- function(lambda, size, exact = TRUE) {
+
+  if (any(c(lambda, size) <= 0))
+    stop("lambda and size must be > 0")
 
   if (exact) {
     m_pz <- cpois(lambda = lambda, size = size)
