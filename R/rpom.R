@@ -45,81 +45,67 @@ p_mag <- function(m, M, exact = TRUE) {
   return(pr_m)
 }
 
-#' Calculate an expected value of upstream distance
+#' Calculate the expected value of upstream river length
 #'
 #' @param lambda Numeric. Branching rate of a network.
 #' @param size Numeric. Total length of a network.
+#' @param exact Logical. If FALSE, use the asymptotic approximation.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
 #' @export
 
-u_length <- function(lambda, size) {
-  ## check input
+u_length <- function(lambda, size, exact = TRUE) {
+
   if (lambda < 0)
-    stop("invalid input: lambda must be >= 0")
+    stop("lambda must be >= 0")
 
   if (size <= 0)
-    stop("invalid input: size must be > 0")
+    stop("size must be > 0")
 
-  ## z: number of links minus 1
-  ## pr_z: probability of b - 1 (= z) links
-  pois_max <- stats::qpois(1 - 1e-10, lambda = lambda * size)
-  v_z <- 0:pois_max
-  pr_z <- stats::dpois(v_z, lambda = lambda * size)
+  if (exact) {
+    ## z: number of links minus 1
+    ## pr_z: probability of b - 1 (= z) links
+    pois_max <- stats::qpois(1 - 1e-10, lambda = lambda * size)
+    v_z <- 0:pois_max
+    pr_z <- stats::dpois(v_z, lambda = lambda * size)
 
-  ## pr_z_tr: truncate probabilities for z taking odd numbers
-  ## - note, when z is an odd number, n links is an even number
-  even_id <- which(v_z %% 2 == 0)
-  odd_id <- which(v_z %% 2 == 1)
-  pr_even <- sum(pr_z[even_id])
-  pr_z_tr <- pr_z / pr_even
-  pr_z_tr[odd_id] <- 0
+    ## pz: truncate probabilities for z taking even numbers
+    ## - note, when z is an even number, n links is an odd number
+    even <- (v_z %% 2 == 0)
+    pr_even <- even * pr_z
+    pz <- pr_even / sum(pr_even)
 
-  ## expected total length of upstream links, conditional on z
-  u_z <- sapply(v_z, function(z) {
-    if (z %% 2 == 0) {
-      ## when z is even = n links is odd
+    ## expected total length of upstream links, conditional on z
+    u_z <- numeric(length(v_z))
+    v_z_even <- v_z[even]
 
-      ## b: number of links
-      ## l_hat: expected length of a link/branch, conditional on b
-      ## - l_hat derived from a Beta distribution Beta(1, z)
-      b <- (z + 1)
+    for (i in seq_along(v_z_even)) {
+
+      ## realized number of links
+      zz <- v_z_even[i]
+      b <- zz + 1
+
+      ## mean link length
       l_hat <- size / b
 
-      ## maximum magnitude in a network
+      ## network-wide magnitude
       M <- 0.5 * (b + 1)
 
-      if (M > 514)
-        stop(paste0("Stream magnitude M exceeds 514,
-                    which will return Inf in choose(2 * M, M);
-                    consider smaller values of lambda and/or size"))
-
-      ## weighted values for the number of upstream links
-      ## - `2m - 2` is the number of upstream links, ub
-      ## - weighted by probability of drawing a link with m magnitude, w_ub
+      ## expected number of upstream links
       m <- 1:M
-      w_ub <- (2 * m - 2) * p_mag(m, M)
-
-      ## expected value for the number of upstream links ub
+      w_ub <- (2 * m - 2) * p_mag(m, M, exact = TRUE)
       ub_hat <- sum(w_ub)
 
-      ## expected value for upstream stream length
-      ## - if poisson distributed,
-      ## - the arrival time (distance to a given patch) will be a uniform dist
-      ## - thus, expectation is (max - min) / 2 = l / 2
-      u <- ub_hat * l_hat + 0.5 * l_hat
-    } else {
-      ## when z is odd = n links is even
-      u <- -1
+      ## expected river length given z
+      u_z[v_z == zz] <- ub_hat * l_hat + 0.5 * l_hat
     }
 
-    return(u)
-  })
-
-  ## sum over z to get an expected value of upstream link length
-  ## u = -1 will be cancelled by multiplying pr_z_tr = 0
-  u_hat <- sum(pr_z_tr * u_z)
+    u_hat <- sum(pz * u_z)
+  } else {
+    ## order of approximation is ^-1/2
+    u_hat <- sqrt(pi / 2) * sqrt(size / lambda) - (3 / 2) * (1 / lambda)
+  }
 
   return(u_hat)
 }
