@@ -113,3 +113,39 @@ maxtp <- function(w,
 
   return(fcl)
 }
+
+#' Utility: Poisson distribution conditioned on even outcomes
+#'
+#' @param lambda Numeric. Branching rate.
+#' @param size Numeric. Total network length.
+#'
+#' @return Named probability vector for even z = 0, 2, 4, ...
+#' @export
+
+cpois <- function(lambda, size) {
+
+  ## effective Poisson mean
+  mu <- lambda * size
+
+  ## handle degenerate case
+  if (mu <= 0) {
+    pz <- numeric(1)
+    names(pz) <- "0"
+    return(pz)
+  }
+
+  ## truncation for numerical support
+  pois_max <- stats::qpois(1 - 1e-10, lambda = mu)
+
+  v_z <- 0:pois_max
+  pr_z <- stats::dpois(v_z, lambda = mu)
+
+  ## keep only even states (conditioning step)
+  keep <- (v_z %% 2 == 0)
+
+  pz <- pr_z[keep]
+  pz <- pz / sum(pz)
+  z <- v_z[keep]
+
+  return(cbind(z, pz))
+}
