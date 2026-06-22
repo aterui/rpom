@@ -118,11 +118,12 @@ maxtp <- function(w,
 #'
 #' @param lambda Numeric. Branching rate.
 #' @param size Numeric. Total network length.
+#' @param min_z Integer. Minimum value of realization.
 #'
 #' @return Named probability vector for even z = 0, 2, 4, ...
 #' @export
 
-cpois <- function(lambda, size) {
+cpois <- function(lambda, size, min_z = 0) {
 
   ## effective Poisson mean
   mu <- lambda * size
@@ -137,7 +138,7 @@ cpois <- function(lambda, size) {
   ## truncation for numerical support
   pois_max <- stats::qpois(1 - 1e-10, lambda = mu)
 
-  v_z <- 0:pois_max
+  v_z <- min_z:pois_max
   pr_z <- stats::dpois(v_z, lambda = mu)
 
   ## keep only even states (conditioning step)
