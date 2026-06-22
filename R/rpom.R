@@ -129,11 +129,24 @@ pdist <- function(lambda, size, exact = TRUE) {
     z <- m_pz[ ,"z"]
     pz <- m_pz[, "pz"]
 
-    A <- log(size) + log(z + 2) - (log(z) + log(z + 1))
-    B <- log(3/2) + (z + 2) * log(2) - lchoose(z + 2, 0.5 * (z + 2))
-    nd <- exp(A + B) - 2 * exp(A)
+    ## "between" links cases for z >= 2 (>= 3 links present)
+    v <- numeric(length(z))
+    idx <- z > 0
+
+    A <- log(size) + log(z[idx] + 2) -
+      log(z[idx]) - log(z[idx] + 1)
+
+    B <- (z[idx] + 2) * log(2) -
+      lchoose(z[idx] + 2, 0.5 * (z[idx] + 2))
+
+    v[idx] <- exp(A + B) - 2 * exp(A)
+
+    pw <- z / (z + 2)
+
+    nd_z <- pw * v + (1 - pw) * (2 * size / ((z + 2) * (z + 3)))
+    nd <- sum(nd_z * pz)
   } else {
-    nd <- (3/2) * sqrt(pi/2) * sqrt(size / lambda) - (2 / lambda)
+    nd <- sqrt(pi/2) * sqrt(size / lambda) - (2 / lambda)
   }
 
   return(nd)
