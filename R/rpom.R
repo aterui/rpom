@@ -154,77 +154,102 @@ pdist <- function(lambda, size, exact = TRUE) {
 
 #' Equilibrium occupancy for basal species
 #'
+#' Computes equilibrium patch occupancy of basal species in a river network
+#' given colonization–extinction dynamics influenced by network structure.
+#'
 #' @inheritParams u_length
-#' @param h Numeric. Habitat patch density (or rate) per unit distance.
-#' @param delta Numeric. Species' dispersal capability.
-#' @param rsrc Numeric. Minimum establishment probability for basal species.
-#' @param zeta Numeric. Effect of stream size on establishment probability for basal species.
-#' @param mu Numeric. Disturbance rate.
-#' @param rho Numeric. Synchrony probability of disturbance.
-#' @param g Numeric. Propagule size.
+#' @param h Numeric. Habitat patch density (patches per unit stream length).
+#' @param delta Numeric. Effect of distance on propagule survival/arrival.
+#' @param r0 Numeric. Baseline establishment probability (0–1).
+#' @param b Numeric. Effect of stream size on establishment probability.
+#' @param mu Numeric. Baseline extinction rate.
+#' @param nu Numeric. Distance decay of spatial synchrony in disturbance cascade.
+#' @param g Numeric. Propagule production rate (scaling factor).
+#' @param exact Logical. Whether to use exact network calculation.
 #'
-#' @author Akira Terui, \email{hanabi0111@gmail.com}
-#'
+#' @return Numeric equilibrium occupancy probability.
+#' @author Akira Terui
 #' @export
 
 p_base <- function(lambda,
                    size,
                    h = 1,
-                   delta = 1,
-                   rsrc = 1,
-                   zeta = 0,
+                   delta = 0.1,
+                   r0 = 1,
+                   b = 0,
                    mu = 1,
-                   rho = 0.5,
-                   g = 10) {
+                   nu = 1 / size,
+                   g = 10,
+                   kernel = c("rational", "linear"),
+                   exact = FALSE) {
 
-  ## check input
-  l_par <- sapply(list(h, delta, rsrc, mu, rho, g),
+  ## check input (basic scalar/validity checks)
+  l_par <- sapply(list(h, delta, r0, b, mu, nu, g),
                   function(x) length(x) > 1)
 
-  v_par <- sapply(list(h, delta, mu, g),
-                  function(x) any(x < 0))
+  if (any(l_par))
+    stop("All parameters must be scalar.")
 
-  v_zero_one <- sapply(list(rsrc, rho),
-                       function(x) any(x < 0) || any(x > 1))
+  if (any(c(h, delta, r0, b, mu, nu, g) < 0))
+    stop("All parameters must be non-negative.")
 
-  if (any(c(l_par, v_par, v_zero_one)))
-    stop("invalid parameter input")
+  if (any(r0 < 0 | r0 > 1))
+    stop("r0 must be between 0 and 1.")
+
+  kernel <- match.arg(kernel)
 
   ## define upstream river length
-  u <- u_length(lambda = lambda, size = size)
+  u <- u_length(lambda = lambda,
+                size = size,
+                exact = exact)
 
-  ## n_patch: scalar, # habitat patches
+  ## pairwise distance
+  d <- pdist(lambda = lambda,
+             size = size,
+             exact = exact)
+
+  ## network diameter
+  diam <- diameter(lambda = lambda,
+                   size = size,
+                   exact = exact)
+
+  ## number of habitat patches
   n_patch <- h * size
 
-  ## - s: scalar, survival probability during migration
-  s <- 1 - exp(- delta * h)
-  sxg <- s * g
+  ## propagule pressure (ensure non-negative)
+  pgle <- switch(
+    kernel,
+    linear   = (g * n_patch) * (1 - delta * d),
+    rational = (g * n_patch) / (1 + delta * d),
+    stop("Unknown kernel: ", kernel)
+  )
 
-  pgle <- ifelse(sxg < n_patch,
-                 yes = sxg,
-                 no = n_patch)
+  if (pgle < 0)
+    stop("pgle = ", pgle, "; invalid parameter values")
 
-  ## - stream size dependency in establishment prob.
-  ## - establishment probability changes with u, but truncated at zero and one
-  p_r <- rsrc + zeta * u
-  r0 <- max(min(c(p_r, 1)), 0)
+  ## establishment probability (bounded 0–1)
+  r <- r0 + b * u
+  if (r < 0 || r > 1)
+    stop("r = ", r, "; invalid parameter values")
 
-  ## clnz: colonization rate
-  clnz <- r0 * pgle
+  ## disturbance synchrony (bounded 0–1)
+  rho <- 1 - nu * (diam / 3)
+  if (rho < 0 || rho > 1)
+    stop("rho = ", rho, "; invalid parameter values")
 
-  ## extn: extinction rate
+  ## colonization and extinction
+  clnz <- r * pgle
   extn <- mu * (1 + rho * u)
 
-  ## equilibrium patch occupancy
-  if (extn == 0 && clnz == 0)
-    stop("colonization and extinction rates are both zero; equilibrium undefined.")
+  if (clnz == 0 && extn == 0)
+    stop("Colonization and extinction are both zero; equilibrium undefined.")
 
+  ## equilibrium occupancy
   p_hat <- 1 - (extn / clnz)
-  p_hat <- ifelse(p_hat > 0, p_hat, 0)
+  p_hat <- max(p_hat, 0)
 
   return(p_hat)
 }
-
 
 #' Equilibrium occupancy for consumer species
 #'
@@ -397,7 +422,7 @@ npom <- function(w,
   v_p_r <- v_rsrc + v_zeta * u
   v_r0 <- sapply(v_p_r,
                  function(y) max(min(c(y, 1)), 0)
-                 )
+  )
 
   v_r <- c(v_r0, rep(0, n_c))
 
@@ -583,7 +608,7 @@ fcl <- function(w,
                               mu = mu0[j],
                               rho = rho[j],
                               g = g[j])
-                       )
+      )
 
     } else {
       ## consumers
@@ -607,7 +632,7 @@ fcl <- function(w,
                               mu = c(mu0[j], mu_p[j]),
                               rho = rho[j],
                               g = g[j])
-                       )
+      )
 
     } # ifelse
   } # for j
