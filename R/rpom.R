@@ -165,9 +165,10 @@ pdist <- function(lambda, size, exact = TRUE) {
 #' @param mu Numeric. Baseline extinction rate.
 #' @param nu Numeric. Distance decay of spatial synchrony in disturbance cascade.
 #' @param g Numeric. Propagule production rate (scaling factor).
+#' @param kernel Character. Define the type of dispersal kernel.
 #' @param exact Logical. Whether to use exact network calculation.
 #'
-#' @return Numeric equilibrium occupancy probability.
+#' @return Numeric equilibrium occupancy.
 #' @author Akira Terui
 #' @export
 
@@ -253,15 +254,22 @@ p_base <- function(lambda,
 
 #' Equilibrium occupancy for consumer species
 #'
+#' Computes equilibrium patch occupancy of a consumer species given prey
+#' occupancy.
+#'
 #' @inheritParams u_length
 #' @inheritParams p_base
-#' @param prey Numeric. Prey availability for consumer species.
-#' @param max_prey Numeric. Species richness of possible prey.
-#' @param mu Numeric vector of disturbance rates.
-#'  \code{mu[1]} = base rate;
-#'  \code{mu[2]} = prey-induced rate;
+#' @param prey Numeric vector of equilibrium occupancy probabilities for prey
+#'   species.
+#' @param max_prey Numeric. Total number of potential prey species.
+#' @param mu Numeric. Extinction-rate parameter(s). If a scalar, the same value
+#'   is used for both components. If a length-2 vector,
+#'   \code{mu[1]} is the baseline extinction rate and
+#'   \code{mu[2]} is the prey-dependent extinction rate.
 #'
-#' @author Akira Terui, \email{hanabi0111@gmail.com}
+#' @return Numeric. Equilibrium occupancy.
+#'
+#' @author Akira Terui
 #'
 #' @export
 
@@ -272,50 +280,82 @@ p_cnsm <- function(lambda,
                    prey,
                    max_prey,
                    mu = 1,
-                   rho = 0.5,
-                   g = 10) {
+                   nu = 1 / size,
+                   g = 10,
+                   kernel = c("rational", "linear"),
+                   exact = FALSE) {
 
-  ## check input
-  l_par <- sapply(list(h, delta, rho, g, prey, max_prey),
+  ## check input (basic scalar/validity checks)
+  l_par <- sapply(list(h, delta, max_prey, nu, g),
                   function(x) length(x) > 1)
 
-  v_par <- sapply(list(h, delta, g, prey, max_prey),
-                  function(x) any(x < 0))
+  if (any(l_par))
+    stop("All parameters but 'mu' must be scalar.")
 
-  v_zero_one <- sapply(list(rho),
-                       function(x) any(x < 0) || any(x > 1))
+  if (any(c(h, delta, prey, max_prey, mu, nu, g) < 0))
+    stop("All parameters must be non-negative.")
 
-  if (any(c(l_par, v_par, v_zero_one)))
-    stop("invalid parameter input")
+  if (!(length(mu) %in% c(1, 2)))
+    stop("'mu' must have length 1 or 2.")
+
+  kernel <- match.arg(kernel)
 
   ## define upstream river length
-  u <- u_length(lambda = lambda, size = size)
+  u <- u_length(lambda = lambda,
+                size = size,
+                exact = exact)
 
-  ## n_patch: scalar, # habitat patches
+  ## pairwise distance
+  d <- pdist(lambda = lambda,
+             size = size,
+             exact = exact)
+
+  ## network diameter
+  diam <- diameter(lambda = lambda,
+                   size = size,
+                   exact = exact)
+
+  ## number of habitat patches
   n_patch <- h * size
 
-  ## s: scalar, survival probability during migration
-  s <- 1 - exp(-delta * h)
-  sxg <- s * g
+  ## propagule pressure (ensure non-negative)
+  pgle <- switch(
+    kernel,
+    linear   = (g * n_patch) * (1 - delta * d),
+    rational = (g * n_patch) / (1 + delta * d),
+    stop("Unknown kernel: ", kernel)
+  )
 
-  pgle <- ifelse(sxg < n_patch,
-                 yes = sxg,
-                 no = n_patch)
+  if (pgle < 0)
+    stop("pgle = ", pgle, "; invalid parameter values")
+
+  ## summed prey occupancy
+  s <- sum(prey)
+  if (s > max_prey)
+    stop("Summed prey occupancy = ", sum(prey), "; must be smaller than 'max_prey'")
+
+  ## fraction of colonizable habitat with at least one prey
+  log_eta <- sum(log(1 - prey))
+  eta <- 1 - exp(log_eta)
+
+  ## disturbance synchrony (bounded 0–1)
+  rho <- 1 - nu * (diam / 3)
+  if (rho < 0 || rho > 1)
+    stop("rho = ", rho, "; invalid parameter values")
 
   ## clnz: colonization rate
-  clnz <- (prey / max_prey) * pgle
+  clnz <- (s / max_prey) * pgle
 
   ## extn: extinction rate
   v_mu <- to_v(mu, 2)
-
-  extn <- v_mu[1] * (1 + rho * u) + v_mu[2] * (1 - (prey / max_prey))
+  extn <- v_mu[1] * (1 + rho * u) + v_mu[2] * (1 - (s / max_prey))
 
   ## equilibrium patch occupancy
   if (extn == 0 && clnz == 0)
     stop("colonization and extinction rates are both zero; equilibrium undefined.")
 
-  p_hat <- 1 - (extn / clnz)
-  p_hat <- ifelse(p_hat > 0, p_hat, 0)
+  p_hat <- eta - (extn / clnz)
+  p_hat <- max(p_hat, 0)
 
   return(p_hat)
 }
