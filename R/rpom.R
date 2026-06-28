@@ -1,8 +1,14 @@
-#' Calculate the probability of drawing a link of magnitude m
+#' Probability of drawing a link with magnitude m
+#'
+#' Calculates the probability that a randomly selected link has magnitude
+#' `m` in a branching river network of magnitude `M`.
 #'
 #' @param m Integer vector of link magnitudes.
-#' @param M Integer network magnitude.
-#' @param exact Logical. If FALSE, use the asymptotic approximation.
+#' @param M Integer. River network magnitude.
+#' @param exact Logical. If `TRUE`, compute the exact probability. If `FALSE`,
+#'   use the asymptotic approximation.
+#'
+#' @return A numeric vector of probabilities corresponding to `m`.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -45,11 +51,17 @@ p_mag <- function(m, M, exact = TRUE) {
   return(pr_m)
 }
 
-#' Calculate the expected value of upstream river length
+#' Expected upstream river length
 #'
-#' @param lambda Numeric. Branching rate.
-#' @param size Numeric. Total network length.
-#' @param exact Logical. If FALSE, use the asymptotic approximation.
+#' Calculates the expected total length of the upstream river network from a
+#' randomly selected location in a branching river network.
+#'
+#' @param lambda Numeric. Branching rate of the river network.
+#' @param size Numeric. Total river network length.
+#' @param exact Logical. If `TRUE`, compute the exact expectation. If `FALSE`,
+#'   use the asymptotic approximation.
+#'
+#' @return A numeric scalar giving the expected upstream river length.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -80,11 +92,16 @@ u_length <- function(lambda, size, exact = TRUE) {
   return(u_hat)
 }
 
-#' Calculate the expected value of network diameter
+#' Expected network diameter
 #'
-#' @param lambda Numeric. Branching rate.
-#' @param size Numeric. Total network length.
-#' @param exact Logical. If FALSE, use the asymptotic approximation.
+#' Calculates the expected diameter of a branching river network.
+#'
+#' @param lambda Numeric. Branching rate of the river network.
+#' @param size Numeric. Total river network length.
+#' @param exact Logical. If `TRUE`, compute the exact expectation. If `FALSE`,
+#'   use the asymptotic approximation.
+#'
+#' @return A numeric scalar giving the expected network diameter.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -109,11 +126,17 @@ diameter <- function(lambda, size, exact = TRUE) {
   return(d)
 }
 
-#' Calculate the expected value of pairwise network distance
+#' Expected pairwise network distance
 #'
-#' @param lambda Numeric. Branching rate.
-#' @param size Numeric. Total network length.
-#' @param exact Logical. If FALSE, use the asymptotic approximation.
+#' Calculates the expected distance between two randomly selected locations in
+#' a branching river network.
+#'
+#' @param lambda Numeric. Branching rate of the river network.
+#' @param size Numeric. Total river network length.
+#' @param exact Logical. If `TRUE`, compute the exact expectation. If `FALSE`,
+#'   use the asymptotic approximation.
+#'
+#' @return A numeric scalar giving the expected pairwise network distance.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -150,22 +173,26 @@ pdist <- function(lambda, size, exact = TRUE) {
   return(nd)
 }
 
-#' Equilibrium occupancy for basal species
+#' Equilibrium occupancy of a basal species
 #'
-#' Computes equilibrium patch occupancy of basal species in a river network
-#' given colonization–extinction dynamics influenced by network structure.
+#' Computes the equilibrium patch occupancy of a basal species in a branching
+#' river network under colonization–extinction dynamics influenced by network
+#' structure.
 #'
 #' @inheritParams u_length
 #' @param h Numeric. Habitat patch density (patches per unit stream length).
-#' @param delta Numeric. Effect of distance on propagule survival/arrival.
-#' @param r0 Numeric. Baseline establishment probability (0–1).
-#' @param b Numeric. Effect of stream size on establishment probability.
+#' @param delta Numeric. Distance-decay rate of propagule dispersal.
+#' @param r0 Numeric. Baseline establishment probability (0--1).
+#' @param b Numeric. Effect of upstream river length on establishment
+#'   probability.
 #' @param mu Numeric. Baseline extinction rate.
-#' @param nu Numeric. Distance decay of spatial synchrony in disturbance cascade.
-#' @param g Numeric. Propagule production rate (scaling factor).
-#' @param exact Logical. Whether to use exact network calculation.
+#' @param nu Numeric. Distance-decay rate of disturbance synchrony.
+#' @param g Numeric. Propagule production rate.
+#' @param exact Logical. If `TRUE`, use exact network calculations. If `FALSE`,
+#'   use asymptotic approximations.
 #'
-#' @return Numeric equilibrium occupancy.
+#' @return A numeric scalar giving the equilibrium occupancy.
+#'
 #' @author Akira Terui
 #' @export
 
@@ -190,10 +217,8 @@ p_base <- function(lambda,
   if (any(c(h, delta, r0, b, mu, nu, g) < 0))
     stop("All parameters must be non-negative.")
 
-  if (any(r0 < 0 || r0 > 1))
+  if (r0 < 0 || r0 > 1)
     stop("r0 must be between 0 and 1.")
-
-  kernel <- match.arg(kernel)
 
   ## define upstream river length
   u <- u_length(lambda = lambda,
@@ -246,10 +271,10 @@ p_base <- function(lambda,
   return(p_hat)
 }
 
-#' Equilibrium occupancy for consumer species
+#' Equilibrium occupancy of a consumer species
 #'
-#' Computes equilibrium patch occupancy of a consumer species given prey
-#' occupancy.
+#' Computes the equilibrium patch occupancy of a consumer species in a
+#' branching river network given the equilibrium occupancy of its prey.
 #'
 #' @inheritParams u_length
 #' @inheritParams p_base
@@ -257,11 +282,11 @@ p_base <- function(lambda,
 #'   species.
 #' @param max_prey Numeric. Total number of potential prey species.
 #' @param mu Numeric. Extinction-rate parameter(s). If a scalar, the same value
-#'   is used for both components. If a length-2 vector,
-#'   \code{mu[1]} is the baseline extinction rate and
-#'   \code{mu[2]} is the prey-dependent extinction rate.
+#'   is used for both extinction components. If a length-2 vector,
+#'   `mu[1]` is the baseline extinction rate and `mu[2]` is the
+#'   prey-dependent extinction rate.
 #'
-#' @return Numeric. Equilibrium occupancy.
+#' @return A numeric scalar giving the equilibrium occupancy.
 #'
 #' @author Akira Terui
 #'
@@ -290,8 +315,6 @@ p_cnsm <- function(lambda,
 
   if (!(length(mu) %in% c(1, 2)))
     stop("'mu' must have length 1 or 2.")
-
-  kernel <- match.arg(kernel)
 
   ## define upstream river length
   u <- u_length(lambda = lambda,
@@ -352,12 +375,20 @@ p_cnsm <- function(lambda,
   return(p_hat)
 }
 
-#' Equilibrium food chain length (analytical)
+#' Equilibrium food chain length
+#'
+#' Computes the equilibrium food chain length of a branching river food web
+#' using the analytical colonization--extinction model.
 #'
 #' @inheritParams u_length
 #' @inheritParams npom
-#' @param weight Logical.
-#'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
+#' @param weight Logical. If `TRUE`, the maximum trophic position is weighted
+#'   by equilibrium species occupancies. If `FALSE`, food chain length is the
+#'   maximum trophic position.
+#'
+#' @return A numeric scalar giving the equilibrium food chain length. The
+#'   equilibrium occupancies are stored as the `"p_hat"` attribute of the
+#'   returned value.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
