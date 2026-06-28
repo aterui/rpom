@@ -575,6 +575,9 @@ npom <- function(w,
   v_nu <- to_v(nu, n = n_species)
   v_rho <- 1 - v_nu * diam
 
+  if (any(c(v_rho < 0, v_rho > 1)))
+    stop("rho must be a probability i.e., rho in [0, 1].")
+
   ## colonization rate
   ## - propagule survival
   v_delta <- to_v(delta, n = n_species)
@@ -585,7 +588,7 @@ npom <- function(w,
   v_r0b <- to_v(r0, n = n_b)
   v_rb <- v_r0b + v_b * u
 
-  if (any(c(v_r0 < 0, v_r0 > 1)))
+  if (any(c(v_rb < 0, v_rb > 1)))
     stop("r (= r0 + b * u) must be a probability i.e., r in [0, 1].")
 
   v_r <- c(v_rb, rep(0, n_c))
