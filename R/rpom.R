@@ -165,7 +165,6 @@ pdist <- function(lambda, size, exact = TRUE) {
 #' @param mu Numeric. Baseline extinction rate.
 #' @param nu Numeric. Distance decay of spatial synchrony in disturbance cascade.
 #' @param g Numeric. Propagule production rate (scaling factor).
-#' @param kernel Character. Define the type of dispersal kernel.
 #' @param exact Logical. Whether to use exact network calculation.
 #'
 #' @return Numeric equilibrium occupancy.
@@ -179,9 +178,8 @@ p_base <- function(lambda,
                    r0 = 1,
                    b = 0,
                    mu = 1,
-                   nu = 1 / size,
-                   g = 10,
-                   kernel = c("rational", "linear"),
+                   nu = 0,
+                   g = 1,
                    exact = FALSE) {
 
   ## check input (basic scalar/validity checks)
@@ -194,7 +192,7 @@ p_base <- function(lambda,
   if (any(c(h, delta, r0, b, mu, nu, g) < 0))
     stop("All parameters must be non-negative.")
 
-  if (any(r0 < 0 | r0 > 1))
+  if (any(r0 < 0 || r0 > 1))
     stop("r0 must be between 0 and 1.")
 
   kernel <- match.arg(kernel)
@@ -214,16 +212,14 @@ p_base <- function(lambda,
                    size = size,
                    exact = exact)
 
+  if (any(c(u, d, diam) < 0))
+    stop("Invalid approximation; increase lambda * size")
+
   ## number of habitat patches
   n_patch <- h * size
 
   ## propagule pressure (ensure non-negative)
-  pgle <- switch(
-    kernel,
-    linear   = (g * n_patch) * (1 - delta * d),
-    rational = (g * n_patch) / (1 + delta * d),
-    stop("Unknown kernel: ", kernel)
-  )
+  pgle <- (g * n_patch) * laplace_rayleigh(delta = delta, mu = d)
 
   if (pgle < 0)
     stop("pgle = ", pgle, "; invalid parameter values")
@@ -276,13 +272,12 @@ p_base <- function(lambda,
 p_cnsm <- function(lambda,
                    size,
                    h = 1,
-                   delta = 1,
+                   delta = 0.1,
                    prey,
                    max_prey,
                    mu = 1,
-                   nu = 1 / size,
-                   g = 10,
-                   kernel = c("rational", "linear"),
+                   nu = 0,
+                   g = 1,
                    exact = FALSE) {
 
   ## check input (basic scalar/validity checks)
@@ -315,16 +310,14 @@ p_cnsm <- function(lambda,
                    size = size,
                    exact = exact)
 
+  if (any(c(u, d, diam) < 0))
+    stop("Invalid approximation; increase lambda * size")
+
   ## number of habitat patches
   n_patch <- h * size
 
   ## propagule pressure (ensure non-negative)
-  pgle <- switch(
-    kernel,
-    linear   = (g * n_patch) * (1 - delta * d),
-    rational = (g * n_patch) / (1 + delta * d),
-    stop("Unknown kernel: ", kernel)
-  )
+  pgle <- (g * n_patch) * laplace_rayleigh(delta = delta, mu = d)
 
   if (pgle < 0)
     stop("pgle = ", pgle, "; invalid parameter values")
@@ -577,14 +570,15 @@ fcl <- function(w,
                 lambda,
                 size,
                 h = 1,
-                delta = 1,
-                rsrc = 1,
-                zeta = 0,
+                delta = 0.1,
+                r0 = 1,
+                b = 0,
+                nu = 0,
                 g = 10,
                 mu0 = 0.1,
                 mu_p = 0.1,
-                rho = 0.5,
-                weight = TRUE) {
+                weight = TRUE,
+                exact = FALSE) {
 
   # check input -------------------------------------------------------------
 
@@ -603,27 +597,22 @@ fcl <- function(w,
   fwb[lower.tri(fwb)] <- 0
   max_prey <- colSums(fwb)
 
-  ## constant terms, rsrc, zeta for basal species
+  ## constant terms, r0, b for basal species
   ## - create vectors with n-basal elements
   n_b <- sum(max_prey == 0)
-  list_b <- lapply(list(rsrc, zeta),
+  list_b <- lapply(list(r0 = r0,
+                        b = b),
                    FUN = function(x) to_v(x, n = n_b))
-
-  names(list_b) <- c("rsrc",
-                     "zeta")
-
 
   ## constant terms, delta, g, mu0, mu_p, rho
   ## - create vectors with n-species elements
   n_sp <- unique(dim(w))
-  list_all <- lapply(list(delta, g, mu0, mu_p, rho),
+  list_all <- lapply(list(delta = delta,
+                          g = g,
+                          mu0 = mu0,
+                          mu_p = mu_p,
+                          nu = nu),
                      FUN = function(x) to_v(x, n = n_sp))
-
-  names(list_all) <- c("delta",
-                       "g",
-                       "mu0",
-                       "mu_p",
-                       "rho")
 
   list_parms <- c(list_b, list_all)
 
@@ -643,11 +632,12 @@ fcl <- function(w,
                               size = size,
                               h = h,
                               delta = delta[j],
-                              rsrc = rsrc[j],
-                              zeta = zeta[j],
+                              r0 = r0[j],
+                              b = b[j],
                               mu = mu0[j],
-                              rho = rho[j],
-                              g = g[j])
+                              nu = nu[j],
+                              g = g[j],
+                              exact = exact)
       )
 
     } else {
@@ -657,7 +647,7 @@ fcl <- function(w,
       index_prey <- which(fwb[, j] == 1)
 
       ## mean-field prey richness
-      prey <- sum(p_hat[index_prey])
+      prey <- p_hat[index_prey]
 
       ## possible maximum of prey richness
       n_prey <- max_prey[j]
@@ -670,8 +660,9 @@ fcl <- function(w,
                               prey = prey,
                               max_prey = n_prey,
                               mu = c(mu0[j], mu_p[j]),
-                              rho = rho[j],
-                              g = g[j])
+                              nu = nu[j],
+                              g = g[j],
+                              exact = exact)
       )
 
     } # ifelse
