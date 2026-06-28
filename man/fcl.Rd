@@ -2,51 +2,63 @@
 % Please edit documentation in R/rpom.R
 \name{fcl}
 \alias{fcl}
-\title{Equilibrium food chain length (analytical)}
+\title{Equilibrium food chain length}
 \usage{
 fcl(
   w,
   lambda,
   size,
   h = 1,
-  delta = 1,
-  rsrc = 1,
-  zeta = 0,
-  g = 10,
+  delta = 0.1,
+  r0 = 1,
+  b = 0,
+  nu = 0,
+  g = 1,
   mu0 = 0.1,
   mu_p = 0.1,
-  rho = 0.5,
-  weight = TRUE
+  weight = TRUE,
+  exact = FALSE
 )
 }
 \arguments{
-\item{w}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
+\item{w}{Matrix. Binary food web matrix produced by \code{ecotools::ppm()}.}
 
-\item{lambda}{Numeric. Branching rate of a network.}
+\item{lambda}{Numeric. Branching rate of the river network.}
 
-\item{size}{Numeric. Total length of a network.}
+\item{size}{Numeric. Total river network length.}
 
-\item{h}{Numeric. Habitat patch density (or rate) per unit distance.}
+\item{h}{Numeric. Habitat patch density (patches per unit stream length).}
 
-\item{delta}{Numeric. Species' dispersal capability.}
+\item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
-\item{rsrc}{Numeric. Minimum establishment probability for basal species.}
+\item{r0}{Numeric. Baseline establishment probability (0--1).}
 
-\item{zeta}{Numeric. Effect of stream size on establishment probability for basal species.}
+\item{b}{Numeric. Effect of upstream river length on establishment
+probability.}
 
-\item{g}{Numeric. Propagule size.}
+\item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 
-\item{mu0}{Numeric scalar or vector of base extinction rates.}
+\item{g}{Numeric. Propagule production rate.}
 
-\item{mu_p}{Numeric scalar or vector of prey-induced extinction rates.}
+\item{mu0}{Numeric scalar or vector. Baseline extinction rate.}
 
-\item{rho}{Numeric scalar or vector of synchrony probability of disturbance.}
+\item{mu_p}{Numeric scalar or vector. Prey-dependent extinction rate.}
 
-\item{weight}{Logical.
-If \code{TRUE}, maximum trophic position is weighted by relative occupancies.}
+\item{weight}{Logical. If \code{TRUE}, the maximum trophic position is weighted
+by equilibrium species occupancies. If \code{FALSE}, food chain length is the
+maximum trophic position.}
+
+\item{exact}{Logical. If \code{TRUE}, compute the exact expectation. If \code{FALSE},
+use the asymptotic approximation.}
+}
+\value{
+A numeric scalar giving the equilibrium food chain length. The
+equilibrium occupancies are stored as the \code{"p_hat"} attribute of the
+returned value.
 }
 \description{
-Equilibrium food chain length (analytical)
+Computes the equilibrium food chain length of a branching river food web
+using the analytical colonization--extinction model.
 }
 \author{
 Akira Terui, \email{hanabi0111@gmail.com}

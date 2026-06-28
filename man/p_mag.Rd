@@ -2,17 +2,24 @@
 % Please edit documentation in R/rpom.R
 \name{p_mag}
 \alias{p_mag}
-\title{Calculate a probability of drawing a link with m magnitude}
+\title{Probability of drawing a link with magnitude m}
 \usage{
-p_mag(m, M)
+p_mag(m, M, exact = TRUE)
 }
 \arguments{
-\item{m}{Integer. Magnitude of a given link.}
+\item{m}{Integer vector of link magnitudes.}
 
-\item{M}{Integer. Magnitude of a network.}
+\item{M}{Integer. River network magnitude.}
+
+\item{exact}{Logical. If \code{TRUE}, compute the exact probability. If \code{FALSE},
+use the asymptotic approximation.}
+}
+\value{
+A numeric vector of probabilities corresponding to \code{m}.
 }
 \description{
-Calculate a probability of drawing a link with m magnitude
+Calculates the probability that a randomly selected link has magnitude
+\code{m} in a branching river network of magnitude \code{M}.
 }
 \author{
 Akira Terui, \email{hanabi0111@gmail.com}

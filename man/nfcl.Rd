@@ -2,7 +2,7 @@
 % Please edit documentation in R/rpom.R
 \name{nfcl}
 \alias{nfcl}
-\title{Equilibrium food chain length (numerical)}
+\title{Equilibrium food chain length}
 \usage{
 nfcl(
   w,
@@ -10,16 +10,16 @@ nfcl(
   size,
   h = 1,
   delta = 1,
-  rsrc = 1,
-  zeta = 0,
+  r0 = 1,
+  b = 0,
   g = 10,
   mu0 = 1,
   mu_p = 1,
   mu_c = 1,
-  rho = 0.5,
+  nu = 0,
   x0 = 0.5,
   n_timestep = 100,
-  interval = 0.01,
+  intv = 0.01,
   threshold = 1e-05,
   n_plus = 10,
   weight = TRUE,
@@ -28,54 +28,64 @@ nfcl(
 )
 }
 \arguments{
-\item{w}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
+\item{w}{Matrix. Binary food web matrix produced by \code{ecotools::ppm()}.}
 
-\item{lambda}{Numeric. Branching rate of a network.}
+\item{lambda}{Numeric. Branching rate of the river network.}
 
-\item{size}{Numeric. Total length of a network.}
+\item{size}{Numeric. Total river network length.}
 
-\item{h}{Numeric. Habitat patch density (or rate) per unit distance.}
+\item{h}{Numeric. Habitat patch density (patches per unit stream length).}
 
-\item{delta}{Numeric. Species' dispersal capability.}
+\item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
-\item{rsrc}{Numeric. Minimum establishment probability for basal species.}
+\item{r0}{Numeric. Baseline establishment probability (0--1).}
 
-\item{zeta}{Numeric. Effect of stream size on establishment probability for basal species.}
+\item{b}{Numeric. Effect of upstream river length on establishment
+probability.}
 
-\item{g}{Numeric. Propagule size.}
+\item{g}{Numeric. Propagule production rate.}
 
-\item{mu0}{Numeric scalar or vector of base extinction rates.}
+\item{mu0}{Numeric scalar or vector. Baseline extinction rate.}
 
-\item{mu_p}{Numeric scalar or vector of prey-induced extinction rates.}
+\item{mu_p}{Numeric scalar or vector. Prey-dependent extinction rate.}
 
-\item{mu_c}{Numeric scalar or vector of consumer-induced extinction rates.}
+\item{mu_c}{Numeric scalar, vector, or matrix. Consumer-dependent extinction
+rate. If a matrix, each element specifies the per-capita effect of a
+consumer on its prey.}
 
-\item{rho}{Numeric scalar or vector of synchrony probability of disturbance.}
+\item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 
-\item{x0}{Numeric. Initial occupancy.}
+\item{x0}{Numeric scalar or vector. Initial occupancy.}
 
-\item{n_timestep}{Integer. Number of time steps.}
+\item{n_timestep}{Integer. Number of time steps for numerical integration.}
 
-\item{interval}{Numeric. Interval for numerical solver.}
+\item{intv}{Numeric. Time interval between integration steps.}
 
-\item{threshold}{Numeric. Threshold value for absorbing condition.}
+\item{threshold}{Numeric. Occupancy threshold below which a species is
+considered extinct.}
 
-\item{n_plus}{Number of additional runs to check convergence to equilibrium.}
+\item{n_plus}{Integer. Number of additional time steps used to assess
+convergence to equilibrium.}
 
-\item{weight}{Logical.
-If \code{TRUE}, maximum trophic position is weighted by relative occupancies.}
+\item{weight}{Logical. If \code{TRUE}, the maximum trophic position is weighted
+by equilibrium species occupancies. If \code{FALSE}, food chain length is the
+maximum trophic position.}
 
-\item{tol}{Numeric.
-Tolerance value for convergence.
-If the difference in the final values of
-the main and additional runs is less than the tolerance value,
-the function returns successful convergence as \code{0}
-in attribute "convergence," otherwise \code{1}.}
+\item{tol}{Numeric. Convergence tolerance. Convergence is considered
+successful if the absolute difference between the final occupancies from
+the main and additional runs is less than \code{tol} for all species.}
 
-\item{...}{Additional arguments for \code{deSolve::ode()}}
+\item{...}{Additional arguments passed to \code{deSolve::ode()}.}
+}
+\value{
+A numeric scalar giving the equilibrium food chain length. The
+equilibrium occupancies are stored as the \code{"p_hat"} attribute. The
+\code{"convergence"} attribute equals \code{0} if convergence was achieved and \code{1}
+otherwise.
 }
 \description{
-Equilibrium food chain length (numerical)
+Computes the equilibrium food chain length of a branching river food web
+using the numerical colonization--extinction model.
 }
 \author{
 Akira Terui, \email{hanabi0111@gmail.com}

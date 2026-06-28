@@ -2,44 +2,54 @@
 % Please edit documentation in R/rpom.R
 \name{p_cnsm}
 \alias{p_cnsm}
-\title{Equilibrium occupancy for consumer species}
+\title{Equilibrium occupancy of a consumer species}
 \usage{
 p_cnsm(
   lambda,
   size,
   h = 1,
-  delta = 1,
+  delta = 0.1,
   prey,
   max_prey,
   mu = 1,
-  rho = 0.5,
-  g = 10
+  nu = 0,
+  g = 1,
+  exact = FALSE
 )
 }
 \arguments{
-\item{lambda}{Numeric. Branching rate of a network.}
+\item{lambda}{Numeric. Branching rate of the river network.}
 
-\item{size}{Numeric. Total length of a network.}
+\item{size}{Numeric. Total river network length.}
 
-\item{h}{Numeric. Habitat patch density (or rate) per unit distance.}
+\item{h}{Numeric. Habitat patch density (patches per unit stream length).}
 
-\item{delta}{Numeric. Species' dispersal capability.}
+\item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
-\item{prey}{Numeric. Prey availability for consumer species.}
+\item{prey}{Numeric vector of equilibrium occupancy probabilities for prey
+species.}
 
-\item{max_prey}{Numeric. Species richness of possible prey.}
+\item{max_prey}{Numeric. Total number of potential prey species.}
 
-\item{mu}{Numeric vector of disturbance rates.
-\code{mu[1]} = base rate;
-\code{mu[2]} = prey-induced rate;}
+\item{mu}{Numeric. Extinction-rate parameter(s). If a scalar, the same value
+is used for both extinction components. If a length-2 vector,
+\code{mu[1]} is the baseline extinction rate and \code{mu[2]} is the
+prey-dependent extinction rate.}
 
-\item{rho}{Numeric. Synchrony probability of disturbance.}
+\item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 
-\item{g}{Numeric. Propagule size.}
+\item{g}{Numeric. Propagule production rate.}
+
+\item{exact}{Logical. If \code{TRUE}, compute the exact expectation. If \code{FALSE},
+use the asymptotic approximation.}
+}
+\value{
+A numeric scalar giving the equilibrium occupancy.
 }
 \description{
-Equilibrium occupancy for consumer species
+Computes the equilibrium patch occupancy of a consumer species in a
+branching river network given the equilibrium occupancy of its prey.
 }
 \author{
-Akira Terui, \email{hanabi0111@gmail.com}
+Akira Terui
 }

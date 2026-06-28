@@ -2,42 +2,52 @@
 % Please edit documentation in R/rpom.R
 \name{p_base}
 \alias{p_base}
-\title{Equilibrium occupancy for basal species}
+\title{Equilibrium occupancy of a basal species}
 \usage{
 p_base(
   lambda,
   size,
   h = 1,
-  delta = 1,
-  rsrc = 1,
-  zeta = 0,
+  delta = 0.1,
+  r0 = 1,
+  b = 0,
   mu = 1,
-  rho = 0.5,
-  g = 10
+  nu = 0,
+  g = 1,
+  exact = FALSE
 )
 }
 \arguments{
-\item{lambda}{Numeric. Branching rate of a network.}
+\item{lambda}{Numeric. Branching rate of the river network.}
 
-\item{size}{Numeric. Total length of a network.}
+\item{size}{Numeric. Total river network length.}
 
-\item{h}{Numeric. Habitat patch density (or rate) per unit distance.}
+\item{h}{Numeric. Habitat patch density (patches per unit stream length).}
 
-\item{delta}{Numeric. Species' dispersal capability.}
+\item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
-\item{rsrc}{Numeric. Minimum establishment probability for basal species.}
+\item{r0}{Numeric. Baseline establishment probability (0--1).}
 
-\item{zeta}{Numeric. Effect of stream size on establishment probability for basal species.}
+\item{b}{Numeric. Effect of upstream river length on establishment
+probability.}
 
-\item{mu}{Numeric. Disturbance rate.}
+\item{mu}{Numeric. Baseline extinction rate.}
 
-\item{rho}{Numeric. Synchrony probability of disturbance.}
+\item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 
-\item{g}{Numeric. Propagule size.}
+\item{g}{Numeric. Propagule production rate.}
+
+\item{exact}{Logical. If \code{TRUE}, use exact network calculations. If \code{FALSE},
+use asymptotic approximations.}
+}
+\value{
+A numeric scalar giving the equilibrium occupancy.
 }
 \description{
-Equilibrium occupancy for basal species
+Computes the equilibrium patch occupancy of a basal species in a branching
+river network under colonization–extinction dynamics influenced by network
+structure.
 }
 \author{
-Akira Terui, \email{hanabi0111@gmail.com}
+Akira Terui
 }

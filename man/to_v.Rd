@@ -14,6 +14,3 @@ to_v(x, n)
 \description{
 Utility: convert to vector format
 }
-\author{
-Akira Terui, \email{hanabi0111@gmail.com}
-}

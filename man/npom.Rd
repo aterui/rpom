@@ -10,57 +10,70 @@ npom(
   lambda,
   h = 1,
   delta = 1,
-  rsrc = 1,
-  zeta = 0,
+  r0 = 1,
+  b = 0,
   g = 1,
   mu0 = 1,
   mu_p = 1,
   mu_c = 1,
-  rho = 0.5,
+  nu = 0,
   x0 = 0.5,
   n_timestep = 100,
-  interval = 0.01,
+  intv = 0.01,
   threshold = 1e-05,
+  exact = TRUE,
   ...
 )
 }
 \arguments{
-\item{w}{Matrix. Binary food web matrix from \code{mcbrnet::ppm()}}
+\item{w}{Matrix. Binary food web matrix produced by \code{ecotools::ppm()}.}
 
-\item{size}{Numeric. Total length of a network.}
+\item{size}{Numeric. Total river network length.}
 
-\item{lambda}{Numeric. Branching rate of a network.}
+\item{lambda}{Numeric. Branching rate of the river network.}
 
-\item{h}{Numeric. Habitat patch density (or rate) per unit distance.}
+\item{h}{Numeric. Habitat patch density (patches per unit stream length).}
 
-\item{delta}{Numeric. Species' dispersal capability.}
+\item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
-\item{rsrc}{Numeric. Minimum establishment probability for basal species.}
+\item{r0}{Numeric. Baseline establishment probability (0--1).}
 
-\item{zeta}{Numeric. Effect of stream size on establishment probability for basal species.}
+\item{b}{Numeric. Effect of upstream river length on establishment
+probability.}
 
-\item{g}{Numeric. Propagule size.}
+\item{g}{Numeric. Propagule production rate.}
 
-\item{mu0}{Numeric scalar or vector of base extinction rates.}
+\item{mu0}{Numeric scalar or vector. Baseline extinction rate.}
 
-\item{mu_p}{Numeric scalar or vector of prey-induced extinction rates.}
+\item{mu_p}{Numeric scalar or vector. Prey-dependent extinction rate.}
 
-\item{mu_c}{Numeric scalar or vector of consumer-induced extinction rates.}
+\item{mu_c}{Numeric scalar, vector, or matrix. Consumer-dependent extinction
+rate. If a matrix, each element specifies the per-capita effect of a
+consumer on its prey.}
 
-\item{rho}{Numeric scalar or vector of synchrony probability of disturbance.}
+\item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 
-\item{x0}{Numeric. Initial occupancy.}
+\item{x0}{Numeric scalar or vector. Initial occupancy.}
 
-\item{n_timestep}{Integer. Number of time steps.}
+\item{n_timestep}{Integer. Number of time steps for numerical integration.}
 
-\item{interval}{Numeric. Interval for numerical solver.}
+\item{intv}{Numeric. Time interval between integration steps.}
 
-\item{threshold}{Numeric. Threshold value for absorbing condition.}
+\item{threshold}{Numeric. Occupancy threshold below which a species is
+considered extinct.}
 
-\item{...}{Additional arguments for \code{deSolve::ode()}}
+\item{exact}{Logical. If \code{TRUE}, compute the exact expectation. If \code{FALSE},
+use the asymptotic approximation.}
+
+\item{...}{Additional arguments passed to \code{deSolve::ode()}.}
+}
+\value{
+A matrix returned by \code{deSolve::ode()}, with one row per time step and
+one column per species (plus the time column).
 }
 \description{
-Numerical solver for equilibrium occupancies
+Solves the colonization--extinction model numerically to obtain equilibrium
+occupancies of all species in a branching river food web.
 }
 \author{
 Akira Terui, \email{hanabi0111@gmail.com}
