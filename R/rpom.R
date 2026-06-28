@@ -355,11 +355,10 @@ p_cnsm <- function(lambda,
 #'
 #' @inheritParams u_length
 #' @inheritParams p_base
-#' @param w Matrix. Binary food web matrix from \code{mcbrnet::ppm()}
+#' @param w Matrix. Binary food web matrix from \code{ecotools::ppm()}
 #' @param mu0 Numeric scalar or vector of base extinction rates.
 #' @param mu_p Numeric scalar or vector of prey-induced extinction rates.
 #' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
-#' @param rho Numeric scalar or vector of synchrony probability of disturbance.
 #' @param x0 Numeric. Initial occupancy.
 #' @param n_timestep Integer. Number of time steps.
 #' @param interval Numeric. Interval for numerical solver.
@@ -384,8 +383,9 @@ npom <- function(w,
                  nu = 0,
                  x0 = 0.5,
                  n_timestep = 100,
-                 interval = 0.01,
+                 intv = 0.01,
                  threshold = 1E-5,
+                 exact = TRUE,
                  ...) {
 
   # check input -------------------------------------------------------------
@@ -409,7 +409,7 @@ npom <- function(w,
     stop("Parameters h, r0, b must be scalar input")
 
   if (zo)
-    stop("x0 must be fractional, i.e., x0 \in [0, 1]")
+    stop("x0 must be a fraction, i.e., x0 in [0, 1]")
 
   # constant setup ----------------------------------------------------------
 
@@ -440,42 +440,40 @@ npom <- function(w,
 
   # parameter setup ---------------------------------------------------------
 
+  ## geometric parameters
+  u <- u_length(lambda = lambda, size = size, exact = exact)
+  diam <- diameter(lambda = lambda, size = size, exact = exact)
+  mu_d <- pdist(lambda = lambda, size = size, exact = exact)
+
   ## spatial parameters
-  v_rho <- to_v(rho, n = n_species)
-  u <- u_length(lambda = lambda, size = size)
+  v_nu <- to_v(nu, n = n_species)
+  v_rho <- 1 - v_nu * diam
 
   ## colonization rate
   ## - propagule survival
   v_delta <- to_v(delta, n = n_species)
-  v_s <- 1 - exp(-v_delta * h)
+  v_s <- laplace_rayleigh(delta = v_delta, mu = mu_d)
 
   ## - resource availability
-  v_zeta <- to_v(zeta, n = n_b)
-  v_rsrc <- to_v(rsrc, n = n_b)
-  v_p_r <- v_rsrc + v_zeta * u
-  v_r0 <- sapply(v_p_r,
-                 function(y) max(min(c(y, 1)), 0)
-  )
+  v_b <- to_v(b, n = n_b)
+  v_r0b <- to_v(r0, n = n_b)
+  v_rb <- v_r0b + v_b * u
 
-  v_r <- c(v_r0, rep(0, n_c))
+  if (any(c(v_r0 < 0, v_r0 > 1)))
+    stop("r (= r0 + b * u) must be a probability i.e., r in [0, 1].")
+
+  v_r <- c(v_rb, rep(0, n_c))
 
   ## - propagule
   n_patch <- h * size
   v_g <- to_v(g, n = n_species)
-  v_pgle <- rep(NA, n_species)
-
-  v_sxg <- v_s * v_g
-
-  id_sxg <- which(v_sxg < n_patch)
-  id_n_patch <- which(v_sxg >= n_patch)
-  v_pgle[id_sxg] <- v_sxg[id_sxg]
-  v_pgle[id_n_patch] <- n_patch
+  v_pgle <- v_g * n_patch * v_s
 
   ## extinction rate
   ## - base rate
   v_mu0 <- to_v(mu0, n = n_species)
 
-  ## - prey availability
+  ## - prey availability effect (set zero for basal species)
   v_mu_p <- to_v(mu_p, n = n_species)
   v_mu_p[id_b] <- 0
 
@@ -483,7 +481,7 @@ npom <- function(w,
   if (is.matrix(mu_c)) {
     ## - if matrix
     if (any(dim(mu_c) != n_species))
-      stop(paste("if mu_c is a matrix, its dimensions must be", n_species, "x", n_species))
+      stop("if mu_c is a matrix, its dimensions must be ", n_species, " by ", n_species)
 
     m_mu_c <- mu_c
   } else {
@@ -504,11 +502,18 @@ npom <- function(w,
       clnz <- pgle * ((Mp %*% x) * inv_s_prey + r)
 
       ## - extinction
-      extn <- mu0 * (1 + rho * u) +
+      extn <-
+        mu0 * (1 + rho * u) +
         mu_p * (1 - (Mp %*% x) * inv_s_prey) +
         mu_c * Mc %*% x
 
-      dx <- clnz * x * (1 - x) - extn * x
+      ## eta
+      ## - basal species's eta = 1
+      eta <- 1 - exp(Mp %*% log1p(-x))
+      eta[id_b] <- 1
+
+      ## dx/dt
+      dx <- clnz * x * (eta - x) - extn * x
 
       list(dx)
     })
@@ -525,10 +530,11 @@ npom <- function(w,
                 mu_c = m_mu_c,
                 Mc = Mc,
                 rho = v_rho,
-                u = u)
+                u = u,
+                id_b = id_b)
 
   x_init <- to_v(x0, n_species)
-  times <- seq(0, n_timestep, by = interval)
+  times <- seq(0, n_timestep, by = intv)
 
   ## define absorbing condition
   ## - root function
