@@ -326,7 +326,8 @@ p_cnsm <- function(lambda,
     stop("Summed prey occupancy = ", sum(prey), "; must be smaller than 'max_prey'")
 
   ## fraction of colonizable habitat with at least one prey
-  log_eta <- sum(log(1 - prey))
+  ## log1p(-prey) = log(1 - prey)
+  log_eta <- sum(log1p(-prey))
   eta <- 1 - exp(log_eta)
 
   ## disturbance synchrony (bounded 0–1)
