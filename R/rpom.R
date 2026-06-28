@@ -361,7 +361,7 @@ p_cnsm <- function(lambda,
 #' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
 #' @param x0 Numeric. Initial occupancy.
 #' @param n_timestep Integer. Number of time steps.
-#' @param interval Numeric. Interval for numerical solver.
+#' @param intv Numeric. Interval for numerical solver.
 #' @param threshold Numeric. Threshold value for absorbing condition.
 #' @param ... Additional arguments for \code{deSolve::ode()}
 #'
@@ -719,7 +719,7 @@ nfcl <- function(w,
                  rho = 0.5,
                  x0 = 0.5,
                  n_timestep = 100,
-                 interval = 0.01,
+                 intv = 0.01,
                  threshold = 1e-05,
                  n_plus = 10,
                  weight = TRUE,
@@ -743,7 +743,7 @@ nfcl <- function(w,
                rho = rho,
                x0 = x0,
                n_timestep = n_timestep,
-               interval = interval,
+               intv = intv,
                threshold = threshold,
                ...)
 
@@ -766,7 +766,7 @@ nfcl <- function(w,
                     rho = rho,
                     x0 = c(p_hat),
                     n_timestep = n_plus,
-                    interval = interval,
+                    intv = intv,
                     threshold = threshold)
 
   p_hat_plus <- cout_plus[nrow(cout_plus), -1]
