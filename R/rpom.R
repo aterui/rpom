@@ -609,11 +609,11 @@ npom <- function(w,
   ## geometric parameters
   u <- u_length(lambda = lambda, size = size, exact = exact)
   diam <- diameter(lambda = lambda, size = size, exact = exact)
-  mu_d <- pdist(lambda = lambda, size = size, exact = exact)
+  d <- pdist(lambda = lambda, size = size, exact = exact)
 
   ## spatial parameters
   v_nu <- to_v(nu, n = n_species)
-  v_rho <- 1 - v_nu * diam
+  v_rho <- 1 - v_nu * (diam / 3)
 
   if (any(c(v_rho < 0, v_rho > 1)))
     stop("rho must be a probability i.e., rho in [0, 1].")
@@ -621,7 +621,7 @@ npom <- function(w,
   ## colonization rate
   ## - propagule survival
   v_delta <- to_v(delta, n = n_species)
-  v_s <- laplace_rayleigh(delta = v_delta, mu = mu_d)
+  v_s <- laplace_rayleigh(delta = v_delta, mu = d)
 
   ## - resource availability
   v_b <- to_v(b, n = n_b)
