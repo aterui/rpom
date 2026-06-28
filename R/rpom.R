@@ -510,17 +510,26 @@ fcl <- function(w,
 
 #' Numerical solver for equilibrium occupancies
 #'
+#' Solves the colonization--extinction model numerically to obtain equilibrium
+#' occupancies of all species in a branching river food web.
+#'
 #' @inheritParams u_length
 #' @inheritParams p_base
-#' @param w Matrix. Binary food web matrix from \code{ecotools::ppm()}
-#' @param mu0 Numeric scalar or vector of base extinction rates.
-#' @param mu_p Numeric scalar or vector of prey-induced extinction rates.
-#' @param mu_c Numeric scalar or vector of consumer-induced extinction rates.
-#' @param x0 Numeric. Initial occupancy.
-#' @param n_timestep Integer. Number of time steps.
-#' @param intv Numeric. Interval for numerical solver.
-#' @param threshold Numeric. Threshold value for absorbing condition.
-#' @param ... Additional arguments for \code{deSolve::ode()}
+#' @param w Matrix. Binary food web matrix produced by `ecotools::ppm()`.
+#' @param mu0 Numeric scalar or vector. Baseline extinction rate.
+#' @param mu_p Numeric scalar or vector. Prey-dependent extinction rate.
+#' @param mu_c Numeric scalar, vector, or matrix. Consumer-dependent extinction
+#'   rate. If a matrix, each element specifies the per-capita effect of a
+#'   consumer on its prey.
+#' @param x0 Numeric scalar or vector. Initial occupancy.
+#' @param n_timestep Integer. Number of time steps for numerical integration.
+#' @param intv Numeric. Time interval between integration steps.
+#' @param threshold Numeric. Occupancy threshold below which a species is
+#'   considered extinct.
+#' @param ... Additional arguments passed to `deSolve::ode()`.
+#'
+#' @return A matrix returned by `deSolve::ode()`, with one row per time step and
+#'   one column per species (plus the time column).
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
@@ -721,19 +730,26 @@ npom <- function(w,
   return(cout)
 }
 
-#' Equilibrium food chain length (numerical)
+#' Equilibrium food chain length
+#'
+#' Computes the equilibrium food chain length of a branching river food web
+#' using the numerical colonization--extinction model.
 #'
 #' @inheritParams u_length
 #' @inheritParams npom
-#' @param n_plus Number of additional runs to check convergence to equilibrium.
-#' @param weight Logical.
-#'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
-#' @param tol Numeric.
-#'  Tolerance value for convergence.
-#'  If the difference in the final values of
-#'  the main and additional runs is less than the tolerance value,
-#'  the function returns successful convergence as \code{0}
-#'  in attribute "convergence," otherwise \code{1}.
+#' @param n_plus Integer. Number of additional time steps used to assess
+#'   convergence to equilibrium.
+#' @param weight Logical. If `TRUE`, the maximum trophic position is weighted
+#'   by equilibrium species occupancies. If `FALSE`, food chain length is the
+#'   maximum trophic position.
+#' @param tol Numeric. Convergence tolerance. Convergence is considered
+#'   successful if the absolute difference between the final occupancies from
+#'   the main and additional runs is less than `tol` for all species.
+#'
+#' @return A numeric scalar giving the equilibrium food chain length. The
+#'   equilibrium occupancies are stored as the `"p_hat"` attribute. The
+#'   `"convergence"` attribute equals `0` if convergence was achieved and `1`
+#'   otherwise.
 #'
 #' @author Akira Terui, \email{hanabi0111@gmail.com}
 #'
