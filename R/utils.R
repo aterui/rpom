@@ -150,3 +150,22 @@ cpois <- function(lambda, size, min_z = 0) {
 
   return(cbind(z, pz))
 }
+
+#' Utility: Laplace transform of a Rayleigh distribution
+#'
+#' Computes E[exp(-delta * d)] where d follows a Rayleigh distribution
+#' with mean distance `mu`.
+#'
+#' Uses the numerically stable representation involving the scaled
+#' complementary error function (`erfcx`).
+#'
+#' @param delta Non-negative rate parameter.
+#' @param mu Mean of the Rayleigh distribution.
+#'
+#' @return A numeric vector equal to E[exp(-delta * d)].
+#'
+#' @export
+
+laplace_rayleigh <- function(delta, mu) {
+  1 - delta * mu * pracma::erfcx(delta * mu / sqrt(pi))
+}
