@@ -133,11 +133,9 @@ pdist <- function(lambda, size, exact = TRUE) {
     v <- numeric(length(z))
     idx <- z > 0
 
-    A <- log(size) + log(z[idx] + 2) -
-      log(z[idx]) - log(z[idx] + 1)
+    A <- log(size) + log(z[idx] + 2) - log(z[idx]) - log(z[idx] + 1)
 
-    B <- (z[idx] + 2) * log(2) -
-      lchoose(z[idx] + 2, 0.5 * (z[idx] + 2))
+    B <- (z[idx] + 2) * log(2) - lchoose(z[idx] + 2, 0.5 * (z[idx] + 2))
 
     v[idx] <- exp(A + B) - 2 * exp(A)
 
