@@ -352,6 +352,131 @@ p_cnsm <- function(lambda,
   return(p_hat)
 }
 
+#' Equilibrium food chain length (analytical)
+#'
+#' @inheritParams u_length
+#' @inheritParams npom
+#' @param weight Logical.
+#'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
+#'
+#' @author Akira Terui, \email{hanabi0111@gmail.com}
+#'
+#' @export
+
+fcl <- function(w,
+                lambda,
+                size,
+                h = 1,
+                delta = 0.1,
+                r0 = 1,
+                b = 0,
+                nu = 0,
+                g = 10,
+                mu0 = 0.1,
+                mu_p = 0.1,
+                weight = TRUE,
+                exact = FALSE) {
+
+  # check input -------------------------------------------------------------
+
+  absfwb <- abs(w)
+  if (!all(absfwb == t(absfwb)))
+    stop("the input w is invalid (abs(w) must be symmetric)")
+
+  if (any(!(absfwb %in% c(0, 1))))
+    stop("the input w is invalid (abs(w) must be binary)")
+
+
+  # transform input ---------------------------------------------------------
+
+  ## w: matrix, consumer-resource matrix. produce with ppm()
+  fwb <- absfwb
+  fwb[lower.tri(fwb)] <- 0
+  max_prey <- colSums(fwb)
+
+  ## constant terms, r0, b for basal species
+  ## - create vectors with n-basal elements
+  n_b <- sum(max_prey == 0)
+  list_b <- lapply(list(r0 = r0,
+                        b = b),
+                   FUN = function(x) to_v(x, n = n_b))
+
+  ## constant terms, delta, g, mu0, mu_p, rho
+  ## - create vectors with n-species elements
+  n_sp <- unique(dim(w))
+  list_all <- lapply(list(delta = delta,
+                          g = g,
+                          mu0 = mu0,
+                          mu_p = mu_p,
+                          nu = nu),
+                     FUN = function(x) to_v(x, n = n_sp))
+
+  list_parms <- c(list_b, list_all)
+
+  ## p_hat: vector initialized with -1, equilibrium occupancy
+  ## max_prey: vector, maximum number of prey items for consumer j
+  p_hat <- rep(-1, n_sp)
+
+  # occupancies -------------------------------------------------------------
+
+  ## sequential determination of equilibrium occupancies
+  for (j in seq_len(n_sp)) {
+
+    if (max_prey[j] == 0) {
+      ## basal species
+      p_hat[j] <- with(list_parms,
+                       p_base(lambda = lambda,
+                              size = size,
+                              h = h,
+                              delta = delta[j],
+                              r0 = r0[j],
+                              b = b[j],
+                              mu = mu0[j],
+                              nu = nu[j],
+                              g = g[j],
+                              exact = exact)
+      )
+
+    } else {
+      ## consumers
+
+      ## index of prey species for consumer j
+      index_prey <- which(fwb[, j] == 1)
+
+      ## mean-field prey richness
+      prey <- p_hat[index_prey]
+
+      ## possible maximum of prey richness
+      n_prey <- max_prey[j]
+
+      p_hat[j] <- with(list_parms,
+                       p_cnsm(lambda = lambda,
+                              size = size,
+                              h = h,
+                              delta = delta[j],
+                              prey = prey,
+                              max_prey = n_prey,
+                              mu = c(mu0[j], mu_p[j]),
+                              nu = nu[j],
+                              g = g[j],
+                              exact = exact)
+      )
+
+    } # ifelse
+  } # for j
+
+
+  # food chain length -------------------------------------------------------
+
+  fcl <- maxtp(w = w,
+               occupancy = p_hat,
+               weight = weight)
+
+  attr(fcl, "p_hat") <- p_hat
+
+  return(fcl)
+}
+
 #' Numerical solver for equilibrium occupancies
 #'
 #' @inheritParams u_length
@@ -561,132 +686,6 @@ npom <- function(w,
 
   return(cout)
 }
-
-#' Equilibrium food chain length (analytical)
-#'
-#' @inheritParams u_length
-#' @inheritParams npom
-#' @param weight Logical.
-#'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
-#'
-#' @author Akira Terui, \email{hanabi0111@gmail.com}
-#'
-#' @export
-
-fcl <- function(w,
-                lambda,
-                size,
-                h = 1,
-                delta = 0.1,
-                r0 = 1,
-                b = 0,
-                nu = 0,
-                g = 10,
-                mu0 = 0.1,
-                mu_p = 0.1,
-                weight = TRUE,
-                exact = FALSE) {
-
-  # check input -------------------------------------------------------------
-
-  absfwb <- abs(w)
-  if (!all(absfwb == t(absfwb)))
-    stop("the input w is invalid (abs(w) must be symmetric)")
-
-  if (any(!(absfwb %in% c(0, 1))))
-    stop("the input w is invalid (abs(w) must be binary)")
-
-
-  # transform input ---------------------------------------------------------
-
-  ## w: matrix, consumer-resource matrix. produce with ppm()
-  fwb <- absfwb
-  fwb[lower.tri(fwb)] <- 0
-  max_prey <- colSums(fwb)
-
-  ## constant terms, r0, b for basal species
-  ## - create vectors with n-basal elements
-  n_b <- sum(max_prey == 0)
-  list_b <- lapply(list(r0 = r0,
-                        b = b),
-                   FUN = function(x) to_v(x, n = n_b))
-
-  ## constant terms, delta, g, mu0, mu_p, rho
-  ## - create vectors with n-species elements
-  n_sp <- unique(dim(w))
-  list_all <- lapply(list(delta = delta,
-                          g = g,
-                          mu0 = mu0,
-                          mu_p = mu_p,
-                          nu = nu),
-                     FUN = function(x) to_v(x, n = n_sp))
-
-  list_parms <- c(list_b, list_all)
-
-  ## p_hat: vector initialized with -1, equilibrium occupancy
-  ## max_prey: vector, maximum number of prey items for consumer j
-  p_hat <- rep(-1, n_sp)
-
-  # occupancies -------------------------------------------------------------
-
-  ## sequential determination of equilibrium occupancies
-  for (j in seq_len(n_sp)) {
-
-    if (max_prey[j] == 0) {
-      ## basal species
-      p_hat[j] <- with(list_parms,
-                       p_base(lambda = lambda,
-                              size = size,
-                              h = h,
-                              delta = delta[j],
-                              r0 = r0[j],
-                              b = b[j],
-                              mu = mu0[j],
-                              nu = nu[j],
-                              g = g[j],
-                              exact = exact)
-      )
-
-    } else {
-      ## consumers
-
-      ## index of prey species for consumer j
-      index_prey <- which(fwb[, j] == 1)
-
-      ## mean-field prey richness
-      prey <- p_hat[index_prey]
-
-      ## possible maximum of prey richness
-      n_prey <- max_prey[j]
-
-      p_hat[j] <- with(list_parms,
-                       p_cnsm(lambda = lambda,
-                              size = size,
-                              h = h,
-                              delta = delta[j],
-                              prey = prey,
-                              max_prey = n_prey,
-                              mu = c(mu0[j], mu_p[j]),
-                              nu = nu[j],
-                              g = g[j],
-                              exact = exact)
-      )
-
-    } # ifelse
-  } # for j
-
-
-  # food chain length -------------------------------------------------------
-
-  fcl <- maxtp(w = w,
-               occupancy = p_hat,
-               weight = weight)
-
-  attr(fcl, "p_hat") <- p_hat
-
-  return(fcl)
-}
-
 
 #' Equilibrium food chain length (numerical)
 #'
