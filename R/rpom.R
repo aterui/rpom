@@ -375,13 +375,13 @@ npom <- function(w,
                  lambda,
                  h = 1,
                  delta = 1,
-                 rsrc = 1,
-                 zeta = 0,
+                 r0 = 1,
+                 b = 0,
                  g = 1,
                  mu0 = 1,
                  mu_p = 1,
                  mu_c = 1,
-                 rho = 0.5,
+                 nu = 0,
                  x0 = 0.5,
                  n_timestep = 100,
                  interval = 0.01,
@@ -391,23 +391,25 @@ npom <- function(w,
   # check input -------------------------------------------------------------
 
   absfwb <- abs(w)
+
+  l_par <- sapply(list(h, r0, b), function(x) length(x) > 1)
+
+  zo <- any(x0 < 0) || any(x0 > 1)
+
   if (!all(absfwb == t(absfwb)))
-    stop("the input w is invalid (abs(w) must be symmetric)")
+    stop("Input w is invalid (abs(w) must be symmetric)")
 
   if (any(!(absfwb %in% c(0, 1))))
-    stop("the input w is invalid (abs(w) must be binary)")
+    stop("Input w is invalid (abs(w) must be binary)")
 
-  l_par <- sapply(list(h, rsrc),
-                  function(x) length(x) > 1)
+  if (any(c(lambda, size, h, delta, r0, g, mu0, mu_p, mu_c, nu) < 0))
+    stop("All parameters must be positive")
 
-  v_par <- sapply(list(h, delta, rsrc, g, mu0, mu_p, mu_c),
-                  function(x) any(x < 0))
+  if (any(l_par))
+    stop("Parameters h, r0, b must be scalar input")
 
-  v_zero_one <- sapply(list(rho, x0),
-                       function(x) any(x < 0) || any(x > 1))
-
-  if (any(c(l_par, v_par, v_zero_one)))
-    stop("invalid parameter input")
+  if (zo)
+    stop("x0 must be fractional, i.e., x0 \in [0, 1]")
 
   # constant setup ----------------------------------------------------------
 
