@@ -12,9 +12,9 @@ lambda_b <- runif(1, 0.1, 1)
 h <- delta <- 1
 
 ## - resource and propagules
-rsrc <- runif(1, 0, 1)
+r0 <- runif(1, 0, 1)
 g <- runif(1, 1, 10)
-zeta <- 1 / rl
+b <- (1 / rl) * (1 - r0)
 
 ## - extinction rates
 mu0 <- runif(1, 0, 0.1)
@@ -22,7 +22,7 @@ mu_p <- runif(1, 0, 0.1)
 
 ## - synchrony prob.
 ## - set 0 to remove spatial effect; focus on food webs
-rho <- runif(1, 0, 0.5)
+nu <- 1 / rl
 
 ## numerical
 cout <- npom(w = fwb,
@@ -30,13 +30,13 @@ cout <- npom(w = fwb,
              lambda = lambda_b,
              h = h,
              delta = delta,
-             rsrc = rsrc,
-             zeta = zeta,
+             r0 = r0,
+             b = b,
              g = g,
              mu0 = mu0,
              mu_p = mu_p,
              mu_c = 0,
-             rho = rho)
+             nu = nu)
 
 y0 <- c(cout[nrow(cout), -1])
 names(y0) <- NULL
@@ -46,11 +46,12 @@ p1 <- p_base(size = rl,
              lambda = lambda_b,
              h = h,
              delta = delta,
-             rsrc = rsrc,
-             zeta = zeta,
+             r0 = r0,
+             b = b,
              g = g,
              mu = mu0,
-             rho = rho)
+             nu = nu,
+             exact = TRUE)
 
 y <- p_cnsm(size = rl,
             lambda = lambda_b,
@@ -60,7 +61,8 @@ y <- p_cnsm(size = rl,
             max_prey = 1,
             g = g,
             mu = c(mu0, mu_p),
-            rho = rho)
+            nu = nu,
+            exact = TRUE)
 
 
 # test --------------------------------------------------------------------
