@@ -677,8 +677,12 @@ npom <- function(w,
         mu_c * Mc %*% x
 
       ## eta
+      ## - subtract small value `xi` to avoid exact 1
       ## - basal species's eta = 1
-      eta <- 1 - exp(Mp %*% log1p(-x))
+      xi <- 1e-12
+      k <- pmin(x, 1 - xi)
+
+      eta <- 1 - exp(Mp %*% log1p(-k))
       eta[id_b] <- 1
 
       ## dx/dt
@@ -813,7 +817,7 @@ nfcl <- function(w,
                     mu0 = mu0,
                     mu_p = mu_p,
                     mu_c = mu_c,
-                    rho = rho,
+                    nu = nu,
                     x0 = c(p_hat),
                     n_timestep = n_plus,
                     intv = intv,
