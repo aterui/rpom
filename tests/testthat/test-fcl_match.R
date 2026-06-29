@@ -1,105 +1,80 @@
+# Generate test data -------------------------------------------------------
 
-# data generation ---------------------------------------------------------
-
-## set parameters
-## - foodweb
+## Food webs
 n_sp <- round(runif(1, 1, 10))
-fwbl <- matrix(0, n_sp, n_sp)
-for (i in seq_len(nrow(fwbl) - 1)) {
-  fwbl[i, i + 1] <- 1
+
+fw_linear <- matrix(0, n_sp, n_sp)
+for (i in seq_len(n_sp - 1)) {
+  fw_linear[i, i + 1] <- 1
 }
+fw_linear <- fw_linear + t(fw_linear)
 
-fwbl <- fwbl + t(fwbl)
+fw_omnivory <- matrix(1, 3, 3)
+diag(fw_omnivory) <- 0
 
-fwb <- matrix(1, 3, 3)
-diag(fwb) <- 0
+## Ecosystem parameters
+rl <- runif(1, 100, 1000)
+lambda_b <- runif(1, 0.3, 1)
 
-## - ecosystem structure
-rl <- runif(1, 10, 100)
-lambda_b <- runif(1, 0.1, 1)
-h <- delta <- 1
+h <- 1
+delta <- 1
 
-## - resource and propagules
-rsrc <- runif(1, 0, 1)
-g <- runif(1, 1, 10)
-zeta <- 1 / rl
+## Resource and propagule supply
+r0 <- runif(1, 0.5, 1)
+g <- runif(1, 10, 100)
+b <- (1 - r0) / rl
 
-## - extinction rates
+## Extinction rates
 mu0 <- runif(1, 0, 1.5)
 mu_p <- runif(1, 0, 1.5)
 
-# test --------------------------------------------------------------------
+check_fcl <- function(w) {
 
-test_that("fcl() = nfcl() with linear food web", {
+  analytical <- fcl(
+    w = w,
+    lambda = lambda_b,
+    size = rl,
+    h = h,
+    delta = delta,
+    r0 = r0,
+    b = b,
+    g = g,
+    mu0 = mu0,
+    mu_p = mu_p,
+    nu = 0,
+    weight = TRUE,
+    exact = TRUE
+  )
 
-  ## analytical
-  y1 <- fcl(w = fwbl,
-            lambda = lambda_b,
-            size = rl,
-            h = h,
-            delta = delta,
-            rsrc = rsrc,
-            zeta = zeta,
-            g = g,
-            mu0 = mu0,
-            mu_p = mu_p,
-            rho = 0,
-            weight = TRUE)
+  numerical <- nfcl(
+    w = w,
+    lambda = lambda_b,
+    size = rl,
+    h = h,
+    delta = delta,
+    r0 = r0,
+    b = b,
+    g = g,
+    mu0 = mu0,
+    mu_p = mu_p,
+    mu_c = 0,
+    nu = 0,
+    n_timestep = 250,
+    threshold = 1e-5,
+    weight = TRUE
+  )
 
-  ## numerical
-  y2 <- nfcl(w = fwbl,
-             lambda = lambda_b,
-             size = rl,
-             h = h,
-             delta = delta,
-             rsrc = rsrc,
-             zeta = zeta,
-             g = g,
-             mu0 = mu0,
-             mu_p = mu_p,
-             mu_c = 0,
-             rho = 0,
-             n_timestep = 250,
-             weight = TRUE,
-             threshold = 1e-5)
+  attributes(analytical) <- attributes(numerical) <- NULL
 
-  expect_equal(c(round(y1, 4)),
-               c(round(y2, 4)))
+  expect_equal(analytical, numerical, tolerance = 1e-4)
+}
+
+# Tests --------------------------------------------------------------------
+
+test_that("fcl() matches nfcl() for a linear food web", {
+  check_fcl(fw_linear)
 })
 
-test_that("fcl() = nfcl() with omnivory", {
-
-  ## analytical
-  y1 <- fcl(w = fwb,
-            lambda = lambda_b,
-            size = rl,
-            h = h,
-            delta = delta,
-            rsrc = rsrc,
-            zeta = zeta,
-            g = g,
-            mu0 = mu0,
-            mu_p = mu_p,
-            rho = 0,
-            weight = TRUE)
-
-  ## numerical
-  y2 <- nfcl(w = fwb,
-             lambda = lambda_b,
-             size = rl,
-             h = h,
-             delta = delta,
-             rsrc = rsrc,
-             zeta = zeta,
-             g = g,
-             mu0 = mu0,
-             mu_p = mu_p,
-             mu_c = 0,
-             rho = 0,
-             n_timestep = 250,
-             weight = TRUE,
-             threshold = 1e-5)
-
-  expect_equal(c(round(y1, 4)),
-               c(round(y2, 4)))
+test_that("fcl() matches nfcl() for an omnivorous food web", {
+  check_fcl(fw_omnivory)
 })
