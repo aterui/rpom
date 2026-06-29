@@ -7,16 +7,17 @@
 maxtp(w, occupancy, weight = TRUE)
 }
 \arguments{
-\item{w}{Binary food web matrix.}
+\item{w}{Square binary adjacency matrix where \code{w[i, j] = 1}
+indicates species i consumes species j.}
 
-\item{occupancy}{Equilibrium occupancies of constituent species}
+\item{occupancy}{Numeric vector of species occupancies at equilibrium.}
 
-\item{weight}{Logical.
-If \code{TRUE}, maximum trophic position is weighted by relative occupancies.}
+\item{weight}{Logical. If \code{TRUE}, trophic positions are weighted by
+relative occupancies.}
 }
 \description{
 Utility: get maximum trophic position
 }
 \author{
-Akira Terui, \email{hanabi0111@gmail.com}
+Akira Terui \email{hanabi0111@gmail.com}
 }

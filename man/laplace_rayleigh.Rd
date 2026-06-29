@@ -12,10 +12,10 @@ laplace_rayleigh(delta, mu)
 \item{mu}{Mean of the Rayleigh distribution.}
 }
 \value{
-A numeric vector equal to E\link{exp(-delta * d)}.
+A numeric vector equal to \code{E[exp(-delta * d)]}.
 }
 \description{
-Computes E\link{exp(-delta * d)} where d follows a Rayleigh distribution
+Computes \code{E[exp(-delta * d)]} where d follows a Rayleigh distribution
 with mean distance \code{mu}.
 }
 \details{
