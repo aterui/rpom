@@ -19,13 +19,13 @@ to_v <- function(x, n) {
 
 #' Utility: get maximum trophic position
 #'
-#' @param w Binary food web matrix.
-#' @param occupancy Equilibrium occupancies of constituent species
-#' @param weight Logical.
-#'  If \code{TRUE}, maximum trophic position is weighted by relative occupancies.
+#' @param w Square binary adjacency matrix where \code{w[i, j] = 1}
+#'   indicates species i consumes species j.
+#' @param occupancy Numeric vector of species occupancies at equilibrium.
+#' @param weight Logical. If \code{TRUE}, trophic positions are weighted by
+#'   relative occupancies.
 #'
-#' @author Akira Terui, \email{hanabi0111@gmail.com}
-#'
+#' @author Akira Terui \email{hanabi0111@gmail.com}
 #' @export
 
 maxtp <- function(w,
@@ -37,13 +37,13 @@ maxtp <- function(w,
   absfwb <- abs(w)
 
   if (!all(absfwb == t(absfwb)))
-    stop("the input w is invalid (abs(w) must be symmetric)")
+    stop("Input w is invalid (abs(w) must be symmetric)")
 
   if (any(!(absfwb %in% c(0, 1))))
-    stop("the input w is invalid (abs(w) must be binary)")
+    stop("Input w is invalid (abs(w) must be binary)")
 
-  if (any(length(occupancy) != dim(w)))
-    stop("the input w or occupancy has invalid dimension.")
+  if (any(dim(w) != length(occupancy)))
+    stop("Input w or occupancy has invalid dimension.")
 
   # trophic position --------------------------------------------------------
 
@@ -66,18 +66,18 @@ maxtp <- function(w,
     ## - v_n_prey, number of prey
     ## - v_sum_o, summed occupancy of prey
     v_o <- occupancy[v_id_p]
-    v_id_b <- which(colSums(m_sub_fwb) == 0)
-    n_b <- sum(colSums(m_sub_fwb) == 0)
     v_n_prey <- colSums(m_sub_fwb)
+    v_id_b <- which(v_n_prey == 0)
+    n_b <- sum(v_n_prey == 0)
     v_sum_o <- drop(v_o %*% m_sub_fwb)
 
     if (any(v_n_prey > 0)) {
       ## v_tp = 1 for basal
       v_tp[v_id_b] <- 1
 
+      ## update v_tp recursively for consumers
       if (weight) {
 
-        ## update v_tp recursively for consumers
         ## - weight = T; calculate v_tp based on relative occupancies
         for (i in (n_b + 1):length(v_tp)) {
           v_tp_prime <- drop(v_tp %*% (m_sub_fwb * v_o))
@@ -153,7 +153,7 @@ cpois <- function(lambda, size, min_z = 0) {
 
 #' Utility: Laplace transform of a Rayleigh distribution
 #'
-#' Computes E[exp(-delta * d)] where d follows a Rayleigh distribution
+#' Computes \code{E[exp(-delta * d)]} where d follows a Rayleigh distribution
 #' with mean distance `mu`.
 #'
 #' Uses the numerically stable representation involving the scaled
@@ -162,7 +162,7 @@ cpois <- function(lambda, size, min_z = 0) {
 #' @param delta Non-negative rate parameter.
 #' @param mu Mean of the Rayleigh distribution.
 #'
-#' @return A numeric vector equal to E[exp(-delta * d)].
+#' @return A numeric vector equal to \code{E[exp(-delta * d)]}.
 #'
 #' @export
 
