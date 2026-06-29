@@ -4,13 +4,13 @@ test_that("p_mag() matches published values from Shreve (1967)", {
   expect_equal(p_mag(1, 1), 1)
 
   expect_equal(
-    p_mag(1, 100),
+    round(p_mag(1, 100), 5),
     0.50251,
     tolerance = 1e-5
   )
 
   expect_equal(
-    p_mag(8, 200),
+    round(p_mag(8, 200), 5),
     0.01336,
     tolerance = 1e-5
   )
