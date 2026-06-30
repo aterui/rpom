@@ -410,6 +410,7 @@ fcl <- function(w,
                 delta = 0.1,
                 r0 = 1,
                 b = 0,
+                rho0 = 1,
                 nu = 0,
                 g = 1,
                 mu0 = 0.1,
@@ -448,6 +449,7 @@ fcl <- function(w,
                           g = g,
                           mu0 = mu0,
                           mu_p = mu_p,
+                          rho0 = rho0,
                           nu = nu),
                      FUN = function(x) to_v(x, n = n_sp))
 
@@ -472,6 +474,7 @@ fcl <- function(w,
                               r0 = r0[j],
                               b = b[j],
                               mu = mu0[j],
+                              rho0 = rho0[j],
                               nu = nu[j],
                               g = g[j],
                               exact = exact)
@@ -485,6 +488,8 @@ fcl <- function(w,
 
       ## mean-field prey richness
       prey <- p_hat[index_prey]
+      if (any(prey < 0) || any(prey > 1))
+        stop("Invalid prey occupancy.")
 
       ## possible maximum of prey richness
       n_prey <- max_prey[j]
@@ -497,6 +502,7 @@ fcl <- function(w,
                               prey = prey,
                               max_prey = n_prey,
                               mu = c(mu0[j], mu_p[j]),
+                              rho0 = rho0[j],
                               nu = nu[j],
                               g = g[j],
                               exact = exact)
