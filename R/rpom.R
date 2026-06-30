@@ -555,6 +555,7 @@ npom <- function(w,
                  mu0 = 1,
                  mu_p = 1,
                  mu_c = 1,
+                 rho0 = 1,
                  nu = 0,
                  x0 = 0.5,
                  n_timestep = 100,
@@ -585,6 +586,9 @@ npom <- function(w,
 
   if (zo)
     stop("x0 must be a fraction, i.e., x0 in [0, 1]")
+
+  if (rho0 < 0 || rho0 > 1)
+    stop("rho0 must be between 0 and 1.")
 
   # constant setup ----------------------------------------------------------
 
@@ -622,7 +626,7 @@ npom <- function(w,
 
   ## spatial parameters
   v_nu <- to_v(nu, n = n_species)
-  v_rho <- 1 - v_nu * (diam / 3)
+  v_rho <- rho0 * (1 - v_nu * (diam / 3))
 
   if (any(c(v_rho < 0, v_rho > 1)))
     stop("rho must be a probability i.e., rho in [0, 1].")
