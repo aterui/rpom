@@ -304,6 +304,7 @@ p_cnsm <- function(lambda,
                    prey,
                    max_prey,
                    mu = 1,
+                   rho0 = 1,
                    nu = 0,
                    g = 1,
                    exact = FALSE) {
@@ -320,6 +321,9 @@ p_cnsm <- function(lambda,
 
   if (!(length(mu) %in% c(1, 2)))
     stop("'mu' must have length 1 or 2.")
+
+  if (rho0 < 0 || rho0 > 1)
+    stop("rho0 must be between 0 and 1.")
 
   ## define upstream river length
   u <- u_length(lambda = lambda,
@@ -359,7 +363,7 @@ p_cnsm <- function(lambda,
   eta <- 1 - exp(log_eta)
 
   ## disturbance synchrony (bounded 0–1)
-  rho <- 1 - nu * (diam / 3)
+  rho <- rho0 * (1 - nu * (diam / 3))
   if (rho < 0 || rho > 1)
     stop("rho = ", rho, "; invalid parameter values")
 
