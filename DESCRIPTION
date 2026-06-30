@@ -1,7 +1,7 @@
 Package: rpom
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.1
+Title: `rpom` Package for Patch Occupancy Modeling
+Version: 0.2.0
 Author: Akira Terui
 Maintainer: Akira Terui <hanabi0111@gmail.com>
 Description: Patch occupancy model for food web dynamics.
