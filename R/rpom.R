@@ -249,7 +249,7 @@ p_base <- function(lambda,
   ## propagule pressure (ensure non-negative)
   pgle <- (g * n_patch) * laplace_rayleigh(delta = delta, mu = d)
 
-  if (pgle < 0)
+  if (pgle < 0 || is.nan(pgle))
     stop("pgle = ", pgle, "; invalid parameter values")
 
   ## establishment probability (bounded 0–1)
@@ -349,7 +349,7 @@ p_cnsm <- function(lambda,
   ## propagule pressure (ensure non-negative)
   pgle <- (g * n_patch) * laplace_rayleigh(delta = delta, mu = d)
 
-  if (pgle < 0)
+  if (pgle < 0 || is.nan(pgle))
     stop("pgle = ", pgle, "; invalid parameter values")
 
   ## summed prey occupancy
