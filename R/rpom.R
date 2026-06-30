@@ -76,7 +76,7 @@ u_length <- function(lambda, size, exact = TRUE) {
     ## z: number of links minus 1
     ## pz: probability of b - 1 (= z) links
     m_pz <- cpois(lambda = lambda, size = size)
-    z <- m_pz[ ,"z"]
+    z <- m_pz[, "z"]
     pz <- m_pz[, "pz"]
 
     n_z <- exp((z + 2) * log(2) - lchoose(z + 2, 0.5 * (z + 2))) - 2
@@ -114,13 +114,13 @@ diameter <- function(lambda, size, exact = TRUE) {
 
   if (exact) {
     m_pz <- cpois(lambda = lambda, size = size)
-    z <- m_pz[ ,"z"]
+    z <- m_pz[, "z"]
     pz <- m_pz[, "pz"]
 
     log_v <- log(size) - log(z + 2) + (z + 2) * log(2) - lchoose(z + 2, 0.5 * (z + 2))
     d <- sum(exp(log_v) * pz)
   } else {
-    d <- sqrt(pi/2) * sqrt(size / lambda)
+    d <- sqrt(pi / 2) * sqrt(size / lambda)
   }
 
   return(d)
@@ -149,7 +149,7 @@ pdist <- function(lambda, size, exact = TRUE) {
 
   if (exact) {
     m_pz <- cpois(lambda = lambda, size = size)
-    z <- m_pz[ ,"z"]
+    z <- m_pz[, "z"]
     pz <- m_pz[, "pz"]
 
     ## "between" links cases for z >= 2 (>= 3 links present)
@@ -167,7 +167,7 @@ pdist <- function(lambda, size, exact = TRUE) {
     nd_z <- pw * v + (1 - pw) * (2 * size / ((z + 2) * (z + 3)))
     nd <- sum(nd_z * pz)
   } else {
-    nd <- sqrt(pi/2) * sqrt(size / lambda) - (2 / lambda)
+    nd <- sqrt(pi / 2) * sqrt(size / lambda) - (2 / lambda)
   }
 
   return(nd)
