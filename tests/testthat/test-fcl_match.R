@@ -17,7 +17,7 @@ rl <- runif(1, 100, 1000)
 lambda_b <- runif(1, 0.3, 1)
 
 h <- 1
-delta <- 1
+delta <- runif(1, 0, 0.1)
 
 ## Resource and propagule supply
 r0 <- runif(1, 0.5, 1)
@@ -65,8 +65,9 @@ check_fcl <- function(w) {
     mu_c = 0,
     rho0 = rho0,
     nu = nu,
-    n_timestep = 250,
-    threshold = 1e-5,
+    n_timestep = 1000,
+    intv = 0.05,
+    threshold = 1e-4,
     weight = TRUE
   )
 

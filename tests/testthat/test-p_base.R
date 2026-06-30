@@ -8,7 +8,7 @@ rl <- runif(1, 10, 100)
 lambda_b <- runif(1, 0.1, 1)
 
 h <- 1
-delta <- 1
+delta <- runif(1, 0, 0.1)
 
 ## Resource and propagule supply
 r0 <- runif(1, 0, 1)
