@@ -186,6 +186,7 @@ pdist <- function(lambda, size, exact = TRUE) {
 #' @param b Numeric. Effect of upstream river length on establishment
 #'   probability.
 #' @param mu Numeric. Baseline extinction rate.
+#' @param rho0 Numeric. Baseline synchrony probability.
 #' @param nu Numeric. Distance-decay rate of disturbance synchrony.
 #' @param g Numeric. Propagule production rate.
 #' @param exact Logical. If `TRUE`, use exact network calculations. If `FALSE`,
@@ -203,6 +204,7 @@ p_base <- function(lambda,
                    r0 = 1,
                    b = 0,
                    mu = 1,
+                   rho0 = 1,
                    nu = 0,
                    g = 1,
                    exact = FALSE) {
@@ -219,6 +221,9 @@ p_base <- function(lambda,
 
   if (r0 < 0 || r0 > 1)
     stop("r0 must be between 0 and 1.")
+
+  if (rho0 < 0 || rho0 > 1)
+    stop("rho0 must be between 0 and 1.")
 
   ## define upstream river length
   u <- u_length(lambda = lambda,
@@ -253,7 +258,7 @@ p_base <- function(lambda,
     stop("r = ", r, "; invalid parameter values")
 
   ## disturbance synchrony (bounded 0–1)
-  rho <- 1 - nu * (diam / 3)
+  rho <- rho0 * (1 - nu * (diam / 3))
   if (rho < 0 || rho > 1)
     stop("rho = ", rho, "; invalid parameter values")
 
