@@ -12,6 +12,7 @@ fcl(
   delta = 0.1,
   r0 = 1,
   b = 0,
+  rho0 = 1,
   nu = 0,
   g = 1,
   mu0 = 0.1,
@@ -35,6 +36,8 @@ fcl(
 
 \item{b}{Numeric. Effect of upstream river length on establishment
 probability.}
+
+\item{rho0}{Numeric. Baseline synchrony probability.}
 
 \item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 
