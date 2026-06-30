@@ -41,6 +41,7 @@ check_fcl <- function(w) {
     g = g,
     mu0 = mu0,
     mu_p = mu_p,
+    rho0 = 0,
     nu = 0,
     weight = TRUE,
     exact = TRUE
@@ -58,6 +59,7 @@ check_fcl <- function(w) {
     mu0 = mu0,
     mu_p = mu_p,
     mu_c = 0,
+    rho0 = 0,
     nu = 0,
     n_timestep = 250,
     threshold = 1e-5,

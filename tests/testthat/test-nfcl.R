@@ -34,6 +34,7 @@ y <- nfcl(
   mu0 = 0,
   mu_p = 0,
   mu_c = 0,
+  rho0 = 0,
   nu = 0,
   exact = TRUE
 )

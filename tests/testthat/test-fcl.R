@@ -31,6 +31,7 @@ y <- fcl(
   g = g,
   mu0 = 0,
   mu_p = 0,
+  rho0 = 0,
   nu = 0
 )
 
