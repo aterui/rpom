@@ -21,6 +21,7 @@ mu0 <- runif(1, 0, 0.1)
 ## Spatial synchrony
 ## Set nu = 1 / rl to minimize spatial effects and isolate local dynamics.
 nu <- 1 / rl
+rho0 <- runif(1)
 
 ## Numerical solution
 cout <- npom(
@@ -34,13 +35,15 @@ cout <- npom(
   g = g,
   mu0 = mu0,
   mu_c = 0,
-  nu = nu
+  rho0 = rho0,
+  nu = nu,
+  n_timestep = 300
 )
 
-y0 <- unname(cout[nrow(cout), -1])
+(y0 <- unname(cout[nrow(cout), -1]))
 
 ## Analytical solution
-y <- p_base(
+(y <- p_base(
   size = rl,
   lambda = lambda_b,
   h = h,
@@ -49,9 +52,10 @@ y <- p_base(
   b = b,
   g = g,
   mu = mu0,
+  rho0 = rho0,
   nu = nu,
   exact = TRUE
-)
+))
 
 # Tests --------------------------------------------------------------------
 
