@@ -28,6 +28,10 @@ b <- (1 - r0) / rl
 mu0 <- runif(1, 0, 1.5)
 mu_p <- runif(1, 0, 1.5)
 
+## Synchrony
+nu <- 1 / rl
+rho0 <- runif(1)
+
 check_fcl <- function(w) {
 
   analytical <- fcl(
@@ -41,8 +45,8 @@ check_fcl <- function(w) {
     g = g,
     mu0 = mu0,
     mu_p = mu_p,
-    rho0 = 0,
-    nu = 0,
+    rho0 = rho0,
+    nu = nu,
     weight = TRUE,
     exact = TRUE
   )
@@ -59,13 +63,14 @@ check_fcl <- function(w) {
     mu0 = mu0,
     mu_p = mu_p,
     mu_c = 0,
-    rho0 = 0,
-    nu = 0,
+    rho0 = rho0,
+    nu = nu,
     n_timestep = 250,
     threshold = 1e-5,
     weight = TRUE
   )
 
+  print(list(analytical, numerical))
   attributes(analytical) <- attributes(numerical) <- NULL
 
   expect_equal(analytical, numerical, tolerance = 1e-4)
