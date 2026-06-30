@@ -12,6 +12,7 @@ p_cnsm(
   prey,
   max_prey,
   mu = 1,
+  rho0 = 1,
   nu = 0,
   g = 1,
   exact = FALSE
@@ -35,6 +36,8 @@ species.}
 is used for both extinction components. If a length-2 vector,
 \code{mu[1]} is the baseline extinction rate and \code{mu[2]} is the
 prey-dependent extinction rate.}
+
+\item{rho0}{Numeric. Baseline synchrony probability.}
 
 \item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 

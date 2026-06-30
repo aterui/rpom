@@ -16,6 +16,7 @@ npom(
   mu0 = 1,
   mu_p = 1,
   mu_c = 1,
+  rho0 = 1,
   nu = 0,
   x0 = 0.5,
   n_timestep = 100,
@@ -50,6 +51,8 @@ probability.}
 \item{mu_c}{Numeric scalar, vector, or matrix. Consumer-dependent extinction
 rate. If a matrix, each element specifies the per-capita effect of a
 consumer on its prey.}
+
+\item{rho0}{Numeric. Baseline synchrony probability.}
 
 \item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 

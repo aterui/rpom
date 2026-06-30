@@ -12,6 +12,7 @@ p_base(
   r0 = 1,
   b = 0,
   mu = 1,
+  rho0 = 1,
   nu = 0,
   g = 1,
   exact = FALSE
@@ -32,6 +33,8 @@ p_base(
 probability.}
 
 \item{mu}{Numeric. Baseline extinction rate.}
+
+\item{rho0}{Numeric. Baseline synchrony probability.}
 
 \item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
 
