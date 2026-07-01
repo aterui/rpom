@@ -219,7 +219,7 @@ laplace_rt <- function(nu, mu, exact = TRUE) {
       exp(-l^2 / (2 * sigma^2))
   }
 
-  psi <- integrate(
+  psi <- stats::integrate(
     f,
     lower = 0,
     upper = Inf,
