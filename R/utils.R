@@ -176,14 +176,14 @@ laplace_rayleigh <- function(delta, mu) {
 #' located disturbance to an affected habitat, assuming root-to-leaf distances
 #' follow a Rayleigh distribution.
 #'
-#' @param delta Positive rate parameter of the Laplace transform.
+#' @param nu Positive rate parameter of the Laplace transform.
 #' @param mu Mean of the Rayleigh distribution for root-to-leaf distance.
 #' @param exact Logical.
 #'   If \code{TRUE}, computes the transform by numerical integration.
 #'   If \code{FALSE}, uses the asymptotic approximation for large
-#'   \code{delta * mu}.
+#'   \code{nu * mu}.
 #'
-#' @return A numeric vector giving \eqn{E[\exp(-\delta d)]}, where
+#' @return A numeric vector giving \eqn{E[\exp(-\nu d)]}, where
 #'   \eqn{d} is the downstream distance from the disturbance to a randomly
 #'   selected affected habitat.
 #'
@@ -191,22 +191,22 @@ laplace_rayleigh <- function(delta, mu) {
 #'
 #' @export
 
-laplace_rt <- function(delta, mu, exact = TRUE) {
+laplace_rt <- function(nu, mu, exact = TRUE) {
 
-  stopifnot(delta >= 0, mu > 0)
+  stopifnot(nu >= 0, mu > 0)
 
-  if (delta == 0)
+  if (nu == 0)
     return(1)
 
   if (!exact) {
 
-    y <- pi / (delta * mu) -
-      pi * log(delta * mu) / (delta * mu)^2
+    y <- pi / (nu * mu) -
+      pi * log(nu * mu) / (nu * mu)^2
 
     if (y > 1)
       stop("Asymptotic approximation invalid: consider `exact = TRUE`")
 
-    if (delta * mu < 30)
+    if (nu * mu < 30)
       warning("Asymptotic approximation unreliable: consider `exact = TRUE`")
 
     return(y)
@@ -215,7 +215,7 @@ laplace_rt <- function(delta, mu, exact = TRUE) {
   sigma <- mu * sqrt(2 / pi)
 
   f <- function(l) {
-    (-expm1(-delta * l) / l) *
+    (-expm1(-nu * l) / l) *
       exp(-l^2 / (2 * sigma^2))
   }
 
@@ -227,5 +227,5 @@ laplace_rt <- function(delta, mu, exact = TRUE) {
     subdivisions = 1000
   )$value / sigma^2
 
-  (pi * delta / mu - 2 * psi) / delta^2
+  (pi * nu / mu - 2 * psi) / nu^2
 }
