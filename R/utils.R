@@ -200,11 +200,16 @@ laplace_rt <- function(delta, mu, exact = TRUE) {
 
   if (!exact) {
 
+    y <- pi / (delta * mu) -
+      pi * log(delta * mu) / (delta * mu)^2
+
+    if (y > 1)
+      stop("Asymptotic approximation invalid: consider `exact = TRUE`")
+
     if (delta * mu < 30)
       warning("Asymptotic approximation unreliable: consider `exact = TRUE`")
 
-    return(pi / (delta * mu) -
-             pi * log(delta * mu) / (delta * mu)^2)
+    return(y)
   }
 
   sigma <- mu * sqrt(2 / pi)
