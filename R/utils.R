@@ -169,3 +169,58 @@ cpois <- function(lambda, size, min_z = 0) {
 laplace_rayleigh <- function(delta, mu) {
   1 - delta * mu * pracma::erfcx(delta * mu / sqrt(pi))
 }
+
+#' Utility: Laplace transform of downstream distance
+#'
+#' Computes the Laplace transform of the downstream distance from a randomly
+#' located disturbance to an affected habitat, assuming root-to-leaf distances
+#' follow a Rayleigh distribution.
+#'
+#' @param delta Positive rate parameter of the Laplace transform.
+#' @param mu Mean of the Rayleigh distribution for root-to-leaf distance.
+#' @param exact Logical.
+#'   If \code{TRUE}, computes the transform by numerical integration.
+#'   If \code{FALSE}, uses the asymptotic approximation for large
+#'   \code{delta * mu}.
+#'
+#' @return A numeric vector giving \eqn{E[\exp(-\delta d)]}, where
+#'   \eqn{d} is the downstream distance from the disturbance to a randomly
+#'   selected affected habitat.
+#'
+#' @author Akira Terui
+#'
+#' @export
+
+laplace_rt <- function(delta, mu, exact = TRUE) {
+
+  stopifnot(delta >= 0, mu > 0)
+
+  if (delta == 0)
+    return(1)
+
+  if (!exact) {
+
+    if (delta * mu < 30)
+      warning("Asymptotic approximation unreliable: consider `exact = TRUE`")
+
+    return(pi / (delta * mu) -
+             pi * log(delta * mu) / (delta * mu)^2)
+  }
+
+  sigma <- mu * sqrt(2 / pi)
+
+  f <- function(l) {
+    (-expm1(-delta * l) / l) *
+      exp(-l^2 / (2 * sigma^2))
+  }
+
+  psi <- integrate(
+    f,
+    lower = 0,
+    upper = Inf,
+    rel.tol = 1e-10,
+    subdivisions = 1000
+  )$value / sigma^2
+
+  (pi * delta / mu - 2 * psi) / delta^2
+}
