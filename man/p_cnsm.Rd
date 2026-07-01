@@ -14,6 +14,7 @@ p_cnsm(
   mu = 1,
   rho0 = 1,
   nu = 0,
+  kernel = c("exp", "linear"),
   g = 1,
   exact = FALSE
 )
@@ -40,6 +41,10 @@ prey-dependent extinction rate.}
 \item{rho0}{Numeric. Baseline synchrony probability.}
 
 \item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
+
+\item{kernel}{Character. Functional form of distance decay in disturbance
+synchrony. Either \code{"exp"} for exponential decay or \code{"linear"} for
+linear decay with distance.}
 
 \item{g}{Numeric. Propagule production rate.}
 

@@ -18,6 +18,7 @@ nfcl(
   mu_c = 1,
   rho0 = 1,
   nu = 0,
+  kernel = c("exp", "linear"),
   x0 = 0.5,
   n_timestep = 100,
   intv = 0.01,
@@ -57,6 +58,10 @@ consumer on its prey.}
 \item{rho0}{Numeric. Baseline synchrony probability.}
 
 \item{nu}{Numeric. Distance-decay rate of disturbance synchrony.}
+
+\item{kernel}{Character. Functional form of distance decay in disturbance
+synchrony. Either \code{"exp"} for exponential decay or \code{"linear"} for
+linear decay with distance.}
 
 \item{x0}{Numeric scalar or vector. Initial occupancy.}
 
