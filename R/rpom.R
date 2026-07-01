@@ -467,6 +467,7 @@ fcl <- function(w,
   if (any(!(absfwb %in% c(0, 1))))
     stop("the input w is invalid (abs(w) must be binary)")
 
+  kernel <- match.arg(kernel)
 
   # transform input ---------------------------------------------------------
 
