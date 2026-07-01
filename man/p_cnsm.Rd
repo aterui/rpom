@@ -16,7 +16,7 @@ p_cnsm(
   nu = 0,
   kernel = c("exp", "linear"),
   g = 1,
-  exact = FALSE
+  exact = TRUE
 )
 }
 \arguments{

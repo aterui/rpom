@@ -26,6 +26,7 @@ nfcl(
   n_plus = 10,
   weight = TRUE,
   tol = 1e-06,
+  exact = TRUE,
   ...
 )
 }
@@ -82,6 +83,9 @@ maximum trophic position.}
 \item{tol}{Numeric. Convergence tolerance. Convergence is considered
 successful if the absolute difference between the final occupancies from
 the main and additional runs is less than \code{tol} for all species.}
+
+\item{exact}{Logical. If \code{TRUE}, compute the exact expectation. If \code{FALSE},
+use the asymptotic approximation.}
 
 \item{...}{Additional arguments passed to \code{deSolve::ode()}.}
 }

@@ -19,7 +19,7 @@ fcl(
   mu0 = 0.1,
   mu_p = 0.1,
   weight = TRUE,
-  exact = FALSE
+  exact = TRUE
 )
 }
 \arguments{
