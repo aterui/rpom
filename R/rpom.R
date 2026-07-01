@@ -588,6 +588,7 @@ npom <- function(w,
                  mu_c = 1,
                  rho0 = 1,
                  nu = 0,
+                 kernel = c("exp", "linear"),
                  x0 = 0.5,
                  n_timestep = 100,
                  intv = 0.01,
@@ -620,6 +621,8 @@ npom <- function(w,
 
   if (rho0 < 0 || rho0 > 1)
     stop("rho0 must be between 0 and 1.")
+
+  kernel <- match.arg(kernel)
 
   # constant setup ----------------------------------------------------------
 
@@ -657,7 +660,15 @@ npom <- function(w,
 
   ## spatial parameters
   v_nu <- to_v(nu, n = n_species)
-  v_rho <- rho0 * (1 - v_nu * (diam / 3))
+  v_laplace_rt <- Vectorize(laplace_rt)
+
+  v_rho <-
+    switch(
+      kernel,
+      linear = rho0 * (1 - v_nu * (diam / 3)),
+      exp = rho0 * v_laplace_rt(nu = v_nu, mu = diam, exact = exact),
+      stop("Unknown kernel type: ", kernel)
+    )
 
   if (any(c(v_rho < 0, v_rho > 1)))
     stop("rho must be a probability i.e., rho in [0, 1].")
