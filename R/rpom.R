@@ -433,6 +433,7 @@ fcl <- function(w,
                 b = 0,
                 rho0 = 1,
                 nu = 0,
+                kernel = c("exp", "linear"),
                 g = 1,
                 mu0 = 0.1,
                 mu_p = 0.1,
@@ -471,7 +472,8 @@ fcl <- function(w,
                           mu0 = mu0,
                           mu_p = mu_p,
                           rho0 = rho0,
-                          nu = nu),
+                          nu = nu,
+                          kernel = kernel),
                      FUN = function(x) to_v(x, n = n_sp))
 
   list_parms <- c(list_b, list_all)
@@ -497,6 +499,7 @@ fcl <- function(w,
                               mu = mu0[j],
                               rho0 = rho0[j],
                               nu = nu[j],
+                              kernel = kernel[j],
                               g = g[j],
                               exact = exact)
       )
@@ -525,6 +528,7 @@ fcl <- function(w,
                               mu = c(mu0[j], mu_p[j]),
                               rho0 = rho0[j],
                               nu = nu[j],
+                              kernel = kernel[j],
                               g = g[j],
                               exact = exact)
       )
