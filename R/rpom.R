@@ -211,7 +211,7 @@ p_base <- function(lambda,
                    nu = 0,
                    kernel = c("exp", "linear"),
                    g = 1,
-                   exact = FALSE) {
+                   exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
   l_par <- sapply(list(h, delta, r0, b, mu, nu, g),
@@ -320,7 +320,7 @@ p_cnsm <- function(lambda,
                    nu = 0,
                    kernel = c("exp", "linear"),
                    g = 1,
-                   exact = FALSE) {
+                   exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
   l_par <- sapply(list(h, delta, max_prey, nu, g),
@@ -438,7 +438,7 @@ fcl <- function(w,
                 mu0 = 0.1,
                 mu_p = 0.1,
                 weight = TRUE,
-                exact = FALSE) {
+                exact = TRUE) {
 
   # check input -------------------------------------------------------------
 
@@ -835,6 +835,7 @@ nfcl <- function(w,
                  n_plus = 10,
                  weight = TRUE,
                  tol = 1e-06,
+                 exact = TRUE,
                  ...) {
 
   # numerical solution ------------------------------------------------------
@@ -858,6 +859,7 @@ nfcl <- function(w,
                n_timestep = n_timestep,
                intv = intv,
                threshold = threshold,
+               exact = exact,
                ...)
 
   p_hat <- cout[nrow(cout), -1]
@@ -883,6 +885,7 @@ nfcl <- function(w,
                     n_timestep = n_plus,
                     intv = intv,
                     threshold = threshold,
+                    exact = exact,
                     ...)
 
   p_hat_plus <- cout_plus[nrow(cout_plus), -1]
