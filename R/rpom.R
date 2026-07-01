@@ -214,7 +214,19 @@ p_base <- function(lambda,
                    exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
-  l_par <- sapply(list(h, delta, r0, b, mu, nu, g),
+  kernel <- match.arg(kernel)
+
+  l_par <- sapply(list(lambda,
+                       size,
+                       h,
+                       delta,
+                       r0,
+                       b,
+                       mu,
+                       rho0,
+                       nu,
+                       kernel,
+                       g),
                   function(x) length(x) > 1)
 
   if (any(l_par))
@@ -228,8 +240,6 @@ p_base <- function(lambda,
 
   if (rho0 < 0 || rho0 > 1)
     stop("rho0 must be between 0 and 1.")
-
-  kernel <- match.arg(kernel)
 
   ## define upstream river length
   u <- u_length(lambda = lambda,
@@ -323,11 +333,21 @@ p_cnsm <- function(lambda,
                    exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
-  l_par <- sapply(list(h, delta, max_prey, nu, g),
+  kernel <- match.arg(kernel)
+
+  l_par <- sapply(list(lambda,
+                       size,
+                       h,
+                       delta,
+                       max_prey,
+                       rho0,
+                       nu,
+                       kernel,
+                       g),
                   function(x) length(x) > 1)
 
   if (any(l_par))
-    stop("All parameters but 'mu' must be scalar.")
+    stop("All parameters but 'prey' and 'mu' must be scalar.")
 
   if (any(c(h, delta, prey, max_prey, mu, nu, g) < 0))
     stop("All parameters must be non-negative.")
@@ -337,8 +357,6 @@ p_cnsm <- function(lambda,
 
   if (rho0 < 0 || rho0 > 1)
     stop("rho0 must be between 0 and 1.")
-
-  kernel <- match.arg(kernel)
 
   ## define upstream river length
   u <- u_length(lambda = lambda,
@@ -598,9 +616,19 @@ npom <- function(w,
 
   # check input -------------------------------------------------------------
 
+  kernel <- match.arg(kernel)
+
   absfwb <- abs(w)
 
-  l_par <- sapply(list(h, r0, b), function(x) length(x) > 1)
+  l_par <- sapply(
+    list(lambda,
+         size,
+         h,
+         r0,
+         b,
+         rho0,
+         kernel),
+    function(x) length(x) > 1)
 
   zo <- any(x0 < 0) || any(x0 > 1)
 
@@ -614,15 +642,13 @@ npom <- function(w,
     stop("All parameters must be positive")
 
   if (any(l_par))
-    stop("Parameters h, r0, b must be scalar input")
+    stop("Parameters 'lambda', 'size', 'h', 'r0', 'b', 'rho0', 'kernel' must be scalar input")
 
   if (zo)
     stop("x0 must be a fraction, i.e., x0 in [0, 1]")
 
   if (rho0 < 0 || rho0 > 1)
     stop("rho0 must be between 0 and 1.")
-
-  kernel <- match.arg(kernel)
 
   # constant setup ----------------------------------------------------------
 
