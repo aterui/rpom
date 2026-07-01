@@ -188,6 +188,9 @@ pdist <- function(lambda, size, exact = TRUE) {
 #' @param mu Numeric. Baseline extinction rate.
 #' @param rho0 Numeric. Baseline synchrony probability.
 #' @param nu Numeric. Distance-decay rate of disturbance synchrony.
+#' @param kernel Character. Functional form of distance decay in disturbance
+#'   synchrony. Either `"exp"` for exponential decay or `"linear"` for
+#'   linear decay with distance.
 #' @param g Numeric. Propagule production rate.
 #' @param exact Logical. If `TRUE`, use exact network calculations. If `FALSE`,
 #'   use asymptotic approximations.
@@ -206,6 +209,7 @@ p_base <- function(lambda,
                    mu = 1,
                    rho0 = 1,
                    nu = 0,
+                   kernel = c("exp", "linear"),
                    g = 1,
                    exact = FALSE) {
 
@@ -224,6 +228,8 @@ p_base <- function(lambda,
 
   if (rho0 < 0 || rho0 > 1)
     stop("rho0 must be between 0 and 1.")
+
+  kernel <- match.arg(kernel)
 
   ## define upstream river length
   u <- u_length(lambda = lambda,
@@ -258,7 +264,13 @@ p_base <- function(lambda,
     stop("r = ", r, "; invalid parameter values")
 
   ## disturbance synchrony (bounded 0–1)
-  rho <- rho0 * (1 - nu * (diam / 3))
+  rho <- switch(
+    kernel,
+    linear = rho0 * (1 - nu * (diam / 3)),
+    exp = rho0 * laplace_rt(nu = nu, mu = diam, exact = exact),
+    stop("Unknown kernel type: ", kernel)
+  )
+
   if (rho < 0 || rho > 1)
     stop("rho = ", rho, "; invalid parameter values")
 
