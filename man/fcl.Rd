@@ -9,15 +9,17 @@ fcl(
   lambda,
   size,
   h = 1,
+  g = 1,
   delta = 0.1,
   r0 = 1,
   b = 0,
   rho0 = 1,
   nu = 0,
   kernel = c("exp", "linear"),
-  g = 1,
   mu0 = 0.1,
   mu_p = 0.1,
+  estb_type = c("prey", "const"),
+  estb_prob = NA_real_,
   weight = TRUE,
   exact = TRUE
 )
@@ -30,6 +32,8 @@ fcl(
 \item{size}{Numeric. Total river network length.}
 
 \item{h}{Numeric. Habitat patch density (patches per unit stream length).}
+
+\item{g}{Numeric. Propagule production rate.}
 
 \item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
@@ -46,11 +50,17 @@ probability.}
 synchrony. Either \code{"exp"} for exponential decay or \code{"linear"} for
 linear decay with distance.}
 
-\item{g}{Numeric. Propagule production rate.}
-
 \item{mu0}{Numeric scalar or vector. Baseline extinction rate.}
 
 \item{mu_p}{Numeric scalar or vector. Prey-dependent extinction rate.}
+
+\item{estb_type}{Character.
+Specifies the expression used for establishment probability.
+\code{"prey"} uses a prey-dependent establishment probability,
+whereas \code{"const"} uses a constant establishment probability.}
+
+\item{estb_prob}{Numeric.
+Establishment probability. Enabled only when \code{estb_type = "const"}.}
 
 \item{weight}{Logical. If \code{TRUE}, the maximum trophic position is weighted
 by equilibrium species occupancies. If \code{FALSE}, food chain length is the

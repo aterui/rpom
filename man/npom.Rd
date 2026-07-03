@@ -9,10 +9,10 @@ npom(
   size,
   lambda,
   h = 1,
-  delta = 1,
+  g = 1,
+  delta = 0.1,
   r0 = 1,
   b = 0,
-  g = 1,
   mu0 = 1,
   mu_p = 1,
   mu_c = 1,
@@ -36,14 +36,14 @@ npom(
 
 \item{h}{Numeric. Habitat patch density (patches per unit stream length).}
 
+\item{g}{Numeric. Propagule production rate.}
+
 \item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
 \item{r0}{Numeric. Baseline establishment probability (0--1).}
 
 \item{b}{Numeric. Effect of upstream river length on establishment
 probability.}
-
-\item{g}{Numeric. Propagule production rate.}
 
 \item{mu0}{Numeric scalar or vector. Baseline extinction rate.}
 

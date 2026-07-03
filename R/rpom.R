@@ -446,6 +446,7 @@ p_cnsm <- function(lambda,
 #'
 #' @inheritParams u_length
 #' @inheritParams npom
+#' @inheritParams p_cnsm
 #' @param weight Logical. If `TRUE`, the maximum trophic position is weighted
 #'   by equilibrium species occupancies. If `FALSE`, food chain length is the
 #'   maximum trophic position.

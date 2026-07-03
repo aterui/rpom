@@ -8,6 +8,7 @@ p_cnsm(
   lambda,
   size,
   h = 1,
+  g = 1,
   delta = 0.1,
   prey,
   max_prey,
@@ -15,7 +16,8 @@ p_cnsm(
   rho0 = 1,
   nu = 0,
   kernel = c("exp", "linear"),
-  g = 1,
+  estb_type = c("prey", "const"),
+  estb_prob = NA_real_,
   exact = TRUE
 )
 }
@@ -25,6 +27,8 @@ p_cnsm(
 \item{size}{Numeric. Total river network length.}
 
 \item{h}{Numeric. Habitat patch density (patches per unit stream length).}
+
+\item{g}{Numeric. Propagule production rate.}
 
 \item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
@@ -46,7 +50,13 @@ prey-dependent extinction rate.}
 synchrony. Either \code{"exp"} for exponential decay or \code{"linear"} for
 linear decay with distance.}
 
-\item{g}{Numeric. Propagule production rate.}
+\item{estb_type}{Character.
+Specifies the expression used for establishment probability.
+\code{"prey"} uses a prey-dependent establishment probability,
+whereas \code{"const"} uses a constant establishment probability.}
+
+\item{estb_prob}{Numeric.
+Establishment probability. Enabled only when \code{estb_type = "const"}.}
 
 \item{exact}{Logical. If \code{TRUE}, compute the exact expectation. If \code{FALSE},
 use the asymptotic approximation.}

@@ -8,6 +8,7 @@ p_base(
   lambda,
   size,
   h = 1,
+  g = 1,
   delta = 0.1,
   r0 = 1,
   b = 0,
@@ -15,7 +16,6 @@ p_base(
   rho0 = 1,
   nu = 0,
   kernel = c("exp", "linear"),
-  g = 1,
   exact = TRUE
 )
 }
@@ -25,6 +25,8 @@ p_base(
 \item{size}{Numeric. Total river network length.}
 
 \item{h}{Numeric. Habitat patch density (patches per unit stream length).}
+
+\item{g}{Numeric. Propagule production rate.}
 
 \item{delta}{Numeric. Distance-decay rate of propagule dispersal.}
 
@@ -42,8 +44,6 @@ probability.}
 \item{kernel}{Character. Functional form of distance decay in disturbance
 synchrony. Either \code{"exp"} for exponential decay or \code{"linear"} for
 linear decay with distance.}
-
-\item{g}{Numeric. Propagule production rate.}
 
 \item{exact}{Logical. If \code{TRUE}, use exact network calculations. If \code{FALSE},
 use asymptotic approximations.}
