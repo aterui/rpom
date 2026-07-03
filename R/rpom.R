@@ -181,6 +181,7 @@ pdist <- function(lambda, size, exact = TRUE) {
 #'
 #' @inheritParams u_length
 #' @param h Numeric. Habitat patch density (patches per unit stream length).
+#' @param g Numeric. Propagule production rate.
 #' @param delta Numeric. Distance-decay rate of propagule dispersal.
 #' @param r0 Numeric. Baseline establishment probability (0--1).
 #' @param b Numeric. Effect of upstream river length on establishment
@@ -191,7 +192,6 @@ pdist <- function(lambda, size, exact = TRUE) {
 #' @param kernel Character. Functional form of distance decay in disturbance
 #'   synchrony. Either `"exp"` for exponential decay or `"linear"` for
 #'   linear decay with distance.
-#' @param g Numeric. Propagule production rate.
 #' @param exact Logical. If `TRUE`, use exact network calculations. If `FALSE`,
 #'   use asymptotic approximations.
 #'
@@ -203,6 +203,7 @@ pdist <- function(lambda, size, exact = TRUE) {
 p_base <- function(lambda,
                    size,
                    h = 1,
+                   g = 1,
                    delta = 0.1,
                    r0 = 1,
                    b = 0,
@@ -210,7 +211,6 @@ p_base <- function(lambda,
                    rho0 = 1,
                    nu = 0,
                    kernel = c("exp", "linear"),
-                   g = 1,
                    exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
@@ -312,12 +312,12 @@ p_base <- function(lambda,
 #'   is used for both extinction components. If a length-2 vector,
 #'   `mu[1]` is the baseline extinction rate and `mu[2]` is the
 #'   prey-dependent extinction rate.
-#' @param  ctype Character.
+#' @param  estb_type Character.
 #'   Specifies the expression used for establishment probability.
 #'   \code{"prey"} uses a prey-dependent establishment probability,
 #'   whereas \code{"const"} uses a constant establishment probability.
 #' @param estb_prob Numeric.
-#'   Establishment probability. Enabled only when \code{ctype = "const"}.
+#'   Establishment probability. Enabled only when \code{estb_type = "const"}.
 #'
 #' @return A numeric scalar giving the equilibrium occupancy.
 #'
@@ -328,6 +328,7 @@ p_base <- function(lambda,
 p_cnsm <- function(lambda,
                    size,
                    h = 1,
+                   g = 1,
                    delta = 0.1,
                    prey,
                    max_prey,
@@ -335,14 +336,13 @@ p_cnsm <- function(lambda,
                    rho0 = 1,
                    nu = 0,
                    kernel = c("exp", "linear"),
-                   g = 1,
-                   ctype = c("prey", "const"),
+                   estb_type = c("prey", "const"),
                    estb_prob = NULL,
                    exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
   kernel <- match.arg(kernel)
-  ctype <- match.arg(ctype)
+  estb_type <- match.arg(estb_type)
 
   l_par <- sapply(list(lambda,
                        size,
@@ -417,12 +417,12 @@ p_cnsm <- function(lambda,
 
   ## clnz: colonization rate
   clnz <- switch(
-    ctype,
+    estb_type,
     prey = (s / max_prey) * pgle,
     const = if (!is.null(estb_prob))
-      estb_prob  * pgle else
+      estb_prob * pgle else
         stop("'estb_prob' is required."),
-    stop("Unknown colonization type: ", ctype)
+    stop("Unknown colonization type: ", estb_type)
   )
 
   ## extn: extinction rate
@@ -462,13 +462,13 @@ fcl <- function(w,
                 lambda,
                 size,
                 h = 1,
+                g = 1,
                 delta = 0.1,
                 r0 = 1,
                 b = 0,
                 rho0 = 1,
                 nu = 0,
                 kernel = c("exp", "linear"),
-                g = 1,
                 mu0 = 0.1,
                 mu_p = 0.1,
                 weight = TRUE,
@@ -614,10 +614,10 @@ npom <- function(w,
                  size,
                  lambda,
                  h = 1,
-                 delta = 1,
+                 g = 1,
+                 delta = 0.1,
                  r0 = 1,
                  b = 0,
-                 g = 1,
                  mu0 = 1,
                  mu_p = 1,
                  mu_c = 1,
@@ -861,10 +861,10 @@ nfcl <- function(w,
                  lambda,
                  size,
                  h = 1,
-                 delta = 1,
+                 g = 1,
+                 delta = 0.1,
                  r0 = 1,
                  b = 0,
-                 g = 10,
                  mu0 = 1,
                  mu_p = 1,
                  mu_c = 1,
