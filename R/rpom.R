@@ -312,6 +312,12 @@ p_base <- function(lambda,
 #'   is used for both extinction components. If a length-2 vector,
 #'   `mu[1]` is the baseline extinction rate and `mu[2]` is the
 #'   prey-dependent extinction rate.
+#' @param  ctype Character.
+#'   Specifies the expression used for establishment probability.
+#'   \code{"prey"} uses a prey-dependent establishment probability,
+#'   whereas \code{"const"} uses a constant establishment probability.
+#' @param estb_prob Numeric.
+#'   Establishment probability. Enabled only when \code{ctype = "const"}.
 #'
 #' @return A numeric scalar giving the equilibrium occupancy.
 #'
@@ -330,10 +336,13 @@ p_cnsm <- function(lambda,
                    nu = 0,
                    kernel = c("exp", "linear"),
                    g = 1,
+                   ctype = c("prey", "const"),
+                   estb_prob = NULL,
                    exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
   kernel <- match.arg(kernel)
+  ctype <- match.arg(ctype)
 
   l_par <- sapply(list(lambda,
                        size,
@@ -407,7 +416,12 @@ p_cnsm <- function(lambda,
     stop("rho = ", rho, "; invalid parameter values")
 
   ## clnz: colonization rate
-  clnz <- (s / max_prey) * pgle
+  clnz <- switch(
+    ctype,
+    prey = (s / max_prey) * pgle,
+    const = estb_prob,
+    stop("Unknown colonization type: ", ctype)
+  )
 
   ## extn: extinction rate
   v_mu <- to_v(mu, 2)
