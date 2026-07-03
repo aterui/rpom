@@ -419,7 +419,9 @@ p_cnsm <- function(lambda,
   clnz <- switch(
     ctype,
     prey = (s / max_prey) * pgle,
-    const = estb_prob,
+    const = if (!is.null(estb_prob))
+      estb_prob  * pgle else
+        stop("'estb_prob' is required."),
     stop("Unknown colonization type: ", ctype)
   )
 
