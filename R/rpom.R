@@ -337,7 +337,7 @@ p_cnsm <- function(lambda,
                    nu = 0,
                    kernel = c("exp", "linear"),
                    estb_type = c("prey", "const"),
-                   estb_prob = NULL,
+                   estb_prob = NA_real_,
                    exact = TRUE) {
 
   ## check input (basic scalar/validity checks)
@@ -419,7 +419,7 @@ p_cnsm <- function(lambda,
   clnz <- switch(
     estb_type,
     prey = (s / max_prey) * pgle,
-    const = if (!is.null(estb_prob))
+    const = if (!is.na(estb_prob))
       estb_prob * pgle else
         stop("'estb_prob' is required."),
     stop("Unknown colonization type: ", estb_type)
@@ -471,6 +471,8 @@ fcl <- function(w,
                 kernel = c("exp", "linear"),
                 mu0 = 0.1,
                 mu_p = 0.1,
+                estb_type = c("prey", "const"),
+                estb_prob = NA_real_,
                 weight = TRUE,
                 exact = TRUE) {
 
@@ -484,6 +486,7 @@ fcl <- function(w,
     stop("the input w is invalid (abs(w) must be binary)")
 
   kernel <- match.arg(kernel)
+  estb_type <- match.arg(estb_type)
 
   # transform input ---------------------------------------------------------
 
@@ -508,7 +511,8 @@ fcl <- function(w,
                           mu_p = mu_p,
                           rho0 = rho0,
                           nu = nu,
-                          kernel = kernel),
+                          kernel = kernel,
+                          estb_prob = estb_prob),
                      FUN = function(x) to_v(x, n = n_sp))
 
   list_parms <- c(list_b, list_all)
@@ -528,6 +532,7 @@ fcl <- function(w,
                        p_base(lambda = lambda,
                               size = size,
                               h = h,
+                              g = g[j],
                               delta = delta[j],
                               r0 = r0[j],
                               b = b[j],
@@ -535,7 +540,6 @@ fcl <- function(w,
                               rho0 = rho0[j],
                               nu = nu[j],
                               kernel = kernel[j],
-                              g = g[j],
                               exact = exact)
       )
 
@@ -557,6 +561,7 @@ fcl <- function(w,
                        p_cnsm(lambda = lambda,
                               size = size,
                               h = h,
+                              g = g[j],
                               delta = delta[j],
                               prey = prey,
                               max_prey = n_prey,
@@ -564,7 +569,8 @@ fcl <- function(w,
                               rho0 = rho0[j],
                               nu = nu[j],
                               kernel = kernel[j],
-                              g = g[j],
+                              estb_type = estb_type,
+                              estb_prob = estb_prob[j],
                               exact = exact)
       )
 
