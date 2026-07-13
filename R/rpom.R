@@ -966,40 +966,52 @@ nfcl <- function(w,
 #'
 #' @param m An \eqn{n \times n} adjacency matrix describing dispersal among
 #'   habitat patches.
-#' @param xi Optional \eqn{n \times n} matrix partitioning dispersal into
-#'   upstream (`xi`) and downstream (`1 - xi`) components. If `NULL`,
+#' @param xi Optional \eqn{n \times n} matrix partitioning dispersal among
+#'   habitat patches into two directional components. Values in `xi` define
+#'   the first component, and `1 - xi` defines the second component. If `NULL`,
 #'   dispersal is assumed to be symmetric.
-#' @param b An \eqn{s \times s} adjacency matrix describing trophic
-#'   dependencies among species.
+#' @param s0 External colonization rate. Defaults to zero.
+#' @param b A \eqn{2 \times 2} adjacency matrix describing trophic
+#'   dependencies between a predator and prey species.
 #' @param cp Colonization probability.
 #' @param theta Colonization scaling factor(s). If `xi = NULL`, a scalar
-#'   value controlling overall colonization strength. Otherwise, a numeric
-#'   vector of length 2 giving upstream and downstream colonization scaling
-#'   factors, respectively.
+#'   value controlling total colonization strength; the value is divided
+#'   equally between the two dispersal components. Otherwise, a numeric
+#'   vector of length 2 giving scaling factors for the two directional
+#'   dispersal components.
 #' @param e Numeric vector of length 2 giving baseline extinction and
 #'   prey-induced extinction rates.
-#' @param u Numeric vector giving upstream habitat size (or watershed area)
-#'   for each habitat patch.
-#' @param rho Numeric vector giving disturbance synchrony probabilities for
-#'   each habitat patch.
-#' @param x0 Numeric vector of initial occupancy probabilities for habitat
-#'   patches.
+#' @param u Numeric vector giving habitat-specific modifiers of disturbance
+#'   sensitivity (e.g., upstream area or watershed size) for each habitat
+#'   patch.
+#' @param rho Numeric vector giving habitat-specific disturbance synchrony
+#'   parameters for each habitat patch.
+#' @param x0 Numeric vector of initial occupancy probabilities for each
+#'   habitat patch. Values are replicated across species.
 #' @param nt End time of the simulation.
 #' @param intv Output interval for numerical integration.
-#' @param ... Additional arguments passed to \code{deSolve::ode()}.
+#' @param ... Additional arguments passed to
+#'   \code{\link[deSolve]{ode}}().
 #'
 #' @details
 #' The function expands the habitat network and trophic interaction matrices
 #' into a species-by-patch system and numerically integrates the resulting
-#' ordinary differential equations using \code{deSolve::ode()}.
-#' Colonization dynamics are determined by dispersal among habitat patches and
-#' trophic interactions, while extinction dynamics incorporate baseline
-#' extinction, prey-induced extinction, and disturbance synchrony.
+#' ordinary differential equations using \code{\link[deSolve]{ode}}().
+#'
+#' Colonization dynamics are determined by external colonization and dispersal
+#' among habitat patches, with directional dispersal optionally specified using
+#' `xi`. Extinction dynamics incorporate baseline extinction, prey-induced
+#' extinction, and habitat-specific disturbance effects.
+#'
+#' The current implementation supports a single predator-prey interaction
+#' structure represented by a 2 \eqn{\times} 2 trophic matrix.
 #'
 #' @return
-#' A matrix produced by \code{deSolve::ode()}, where the first column
-#' contains time and the remaining columns contain occupancy probabilities
-#' for each species-by-patch state variable.
+#' A matrix returned by \code{\link[deSolve]{ode}}(), where the first column
+#' contains time and the remaining columns contain occupancy probabilities for
+#' each species-by-patch state variable. Columns are ordered by species, with
+#' all habitat patches for the first species followed by all habitat patches
+#' for the next species.
 #'
 #' @export
 
@@ -1007,6 +1019,7 @@ nspom <- function(
     m = rbind(c(0, 1), c(1, 0)),
     xi = NULL,
     b = rbind(c(0, 0), c(1, 0)),
+    s0 = 0,
     cp = 0.5,
     theta = 1,
     e = c(1, 1),
@@ -1091,7 +1104,7 @@ nspom <- function(
     v_theta <- theta
   }
 
-  B <- kronecker(b, diag(2))
+  B <- kronecker(b, diag(n))
 
   v_x0 <- rep(x0, s)
   v_u <- rep(u, s)
@@ -1104,14 +1117,15 @@ nspom <- function(
 
     with(parms, {
 
+      eta <- drop(B %*% x) + o
+
       # colonization
-      clnz <- cp * (theta[1] * (Mu %*% x) + theta[2] * (Md %*% x))
-      eta <- (B %*% x) + o
+      clnz <- s0 + cp * (theta[1] * drop(Mu %*% x) + theta[2] * drop(Md %*% x))
 
       # extinction
       extn <-
         e[1] * (1 + rho * u) +
-        e[2] * (B %*% x)
+        e[2] * (1 - eta)
 
       # ode
       dx <- clnz * (eta - x) - extn * x
@@ -1121,12 +1135,13 @@ nspom <- function(
   }
 
   parms <- list(
+    s0 = s0,
+    cp = cp,
     Mu = Mu,
     Md = Md,
-    B = B,
-    o = v_o,
-    cp = cp,
     theta = v_theta,
+    o = v_o,
+    B = B,
     e = e,
     rho = v_rho,
     u = v_u
