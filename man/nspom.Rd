@@ -11,7 +11,7 @@ nspom(
   s0 = 0,
   cp = 0.5,
   theta = 1,
-  e = c(1, 1),
+  mu = c(1, 1),
   u = NULL,
   rho = NULL,
   x0 = NULL,
@@ -42,7 +42,7 @@ equally between the two dispersal components. Otherwise, a numeric
 vector of length 2 giving scaling factors for the two directional
 dispersal components.}
 
-\item{e}{Numeric vector of length 2 giving baseline extinction and
+\item{mu}{Numeric vector of length 2 giving baseline extinction and
 prey-induced extinction rates.}
 
 \item{u}{Numeric vector giving habitat-specific modifiers of disturbance
