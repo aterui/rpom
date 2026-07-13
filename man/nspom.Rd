@@ -8,6 +8,7 @@ nspom(
   m = rbind(c(0, 1), c(1, 0)),
   xi = NULL,
   b = rbind(c(0, 0), c(1, 0)),
+  s0 = 0,
   cp = 0.5,
   theta = 1,
   e = c(1, 1),
@@ -23,42 +24,50 @@ nspom(
 \item{m}{An \eqn{n \times n} adjacency matrix describing dispersal among
 habitat patches.}
 
-\item{xi}{Optional \eqn{n \times n} matrix partitioning dispersal into
-upstream (\code{xi}) and downstream (\code{1 - xi}) components. If \code{NULL},
+\item{xi}{Optional \eqn{n \times n} matrix partitioning dispersal among
+habitat patches into two directional components. Values in \code{xi} define
+the first component, and \code{1 - xi} defines the second component. If \code{NULL},
 dispersal is assumed to be symmetric.}
 
-\item{b}{An \eqn{s \times s} adjacency matrix describing trophic
-dependencies among species.}
+\item{b}{A \eqn{2 \times 2} adjacency matrix describing trophic
+dependencies between a predator and prey species.}
+
+\item{s0}{External colonization rate. Defaults to zero.}
 
 \item{cp}{Colonization probability.}
 
 \item{theta}{Colonization scaling factor(s). If \code{xi = NULL}, a scalar
-value controlling overall colonization strength. Otherwise, a numeric
-vector of length 2 giving upstream and downstream colonization scaling
-factors, respectively.}
+value controlling total colonization strength; the value is divided
+equally between the two dispersal components. Otherwise, a numeric
+vector of length 2 giving scaling factors for the two directional
+dispersal components.}
 
 \item{e}{Numeric vector of length 2 giving baseline extinction and
 prey-induced extinction rates.}
 
-\item{u}{Numeric vector giving upstream habitat size (or watershed area)
-for each habitat patch.}
+\item{u}{Numeric vector giving habitat-specific modifiers of disturbance
+sensitivity (e.g., upstream area or watershed size) for each habitat
+patch.}
 
-\item{rho}{Numeric vector giving disturbance synchrony probabilities for
-each habitat patch.}
+\item{rho}{Numeric vector giving habitat-specific disturbance synchrony
+parameters for each habitat patch.}
 
-\item{x0}{Numeric vector of initial occupancy probabilities for habitat
-patches.}
+\item{x0}{Numeric vector of initial occupancy probabilities for each
+habitat patch. Values are replicated across species.}
 
 \item{nt}{End time of the simulation.}
 
 \item{intv}{Output interval for numerical integration.}
 
-\item{...}{Additional arguments passed to \code{deSolve::ode()}.}
+\item{...}{Additional arguments passed to
+\code{\link[deSolve]{ode}}().}
 }
 \value{
-A matrix produced by \code{deSolve::ode()}, where the first column
-contains time and the remaining columns contain occupancy probabilities
-for each species-by-patch state variable.
+A matrix returned by \code{\link[deSolve]{ode}}(), where the first column
+contains time and the remaining columns contain occupancy probabilities for
+each species-by-patch state variable. Columns are ordered by species, with
+all habitat patches for the first species followed by all habitat patches
+for the next species.
 }
 \description{
 Solves a prey-predator spatial patch occupancy model on a directed network
@@ -67,8 +76,13 @@ using numerical integration.
 \details{
 The function expands the habitat network and trophic interaction matrices
 into a species-by-patch system and numerically integrates the resulting
-ordinary differential equations using \code{deSolve::ode()}.
-Colonization dynamics are determined by dispersal among habitat patches and
-trophic interactions, while extinction dynamics incorporate baseline
-extinction, prey-induced extinction, and disturbance synchrony.
+ordinary differential equations using \code{\link[deSolve]{ode}}().
+
+Colonization dynamics are determined by external colonization and dispersal
+among habitat patches, with directional dispersal optionally specified using
+\code{xi}. Extinction dynamics incorporate baseline extinction, prey-induced
+extinction, and habitat-specific disturbance effects.
+
+The current implementation supports a single predator-prey interaction
+structure represented by a 2 \eqn{\times} 2 trophic matrix.
 }
