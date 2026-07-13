@@ -979,7 +979,7 @@ nfcl <- function(w,
 #'   equally between the two dispersal components. Otherwise, a numeric
 #'   vector of length 2 giving scaling factors for the two directional
 #'   dispersal components.
-#' @param e Numeric vector of length 2 giving baseline extinction and
+#' @param mu Numeric vector of length 2 giving baseline extinction and
 #'   prey-induced extinction rates.
 #' @param u Numeric vector giving habitat-specific modifiers of disturbance
 #'   sensitivity (e.g., upstream area or watershed size) for each habitat
@@ -1022,7 +1022,7 @@ nspom <- function(
     s0 = 0,
     cp = 0.5,
     theta = 1,
-    e = c(1, 1),
+    mu = c(1, 1),
     u = NULL,
     rho = NULL,
     x0 = NULL,
@@ -1076,8 +1076,8 @@ nspom <- function(
   if (is.null(x0))
     x0 <- rep(0.5, n)
 
-  if (length(e) != 2)
-    stop("'e' must have length 2.")
+  if (length(mu) != 2)
+    stop("'mu' must have length 2.")
 
   nargs <- list(u = u, x0 = x0, rho = rho)
   for (nm in names(nargs)) {
@@ -1091,16 +1091,16 @@ nspom <- function(
     if (length(theta) != 1)
       stop("'theta' must have length 1")
 
-    Mu <- Md <- kronecker(diag(n), m)
+    Mup <- Mdown <- kronecker(diag(n), m)
     v_theta <- rep(0.5 * theta, 2)
   } else {
     if (length(theta) != 2)
       stop("'theta' must have length 2")
 
-    m_u <- xi * m
-    m_d <- (1 - xi) * m
-    Mu <- kronecker(diag(n), m_u)
-    Md <- kronecker(diag(n), m_d)
+    m_up <- xi * m
+    m_down <- (1 - xi) * m
+    Mup <- kronecker(diag(n), m_up)
+    Mdown <- kronecker(diag(n), m_down)
     v_theta <- theta
   }
 
@@ -1120,12 +1120,12 @@ nspom <- function(
       eta <- drop(B %*% x) + o
 
       # colonization
-      clnz <- s0 + cp * (theta[1] * drop(Mu %*% x) + theta[2] * drop(Md %*% x))
+      clnz <- s0 + cp * (theta[1] * drop(Mup %*% x) + theta[2] * drop(Mdown %*% x))
 
       # extinction
       extn <-
-        e[1] * (1 + rho * u) +
-        e[2] * (1 - eta)
+        mu[1] * (1 + rho * u) +
+        mu[2] * (1 - eta)
 
       # ode
       dx <- clnz * (eta - x) - extn * x
@@ -1137,12 +1137,12 @@ nspom <- function(
   parms <- list(
     s0 = s0,
     cp = cp,
-    Mu = Mu,
-    Md = Md,
+    Mup = Mup,
+    Mdown = Mdown,
     theta = v_theta,
     o = v_o,
     B = B,
-    e = e,
+    mu = mu,
     rho = v_rho,
     u = v_u
   )
