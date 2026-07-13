@@ -958,3 +958,185 @@ nfcl <- function(w,
 
   return(fcl)
 }
+
+#' Simulate patch occupancy dynamics
+#'
+#' Solves a prey-predator spatial patch occupancy model on a directed network
+#' using numerical integration.
+#'
+#' @param m An \eqn{n \times n} adjacency matrix describing dispersal among
+#'   habitat patches.
+#' @param xi Optional \eqn{n \times n} matrix partitioning dispersal into
+#'   upstream (`xi`) and downstream (`1 - xi`) components. If `NULL`,
+#'   dispersal is assumed to be symmetric.
+#' @param b An \eqn{s \times s} adjacency matrix describing trophic
+#'   dependencies among species.
+#' @param cp Colonization probability.
+#' @param theta Colonization scaling factor(s). If `xi = NULL`, a scalar
+#'   value controlling overall colonization strength. Otherwise, a numeric
+#'   vector of length 2 giving upstream and downstream colonization scaling
+#'   factors, respectively.
+#' @param e Numeric vector of length 2 giving baseline extinction and
+#'   prey-induced extinction rates.
+#' @param u Numeric vector giving upstream habitat size (or watershed area)
+#'   for each habitat patch.
+#' @param rho Numeric vector giving disturbance synchrony probabilities for
+#'   each habitat patch.
+#' @param x0 Numeric vector of initial occupancy probabilities for habitat
+#'   patches.
+#' @param nt End time of the simulation.
+#' @param intv Output interval for numerical integration.
+#' @param ... Additional arguments passed to \code{deSolve::ode()}.
+#'
+#' @details
+#' The function expands the habitat network and trophic interaction matrices
+#' into a species-by-patch system and numerically integrates the resulting
+#' ordinary differential equations using \code{deSolve::ode()}.
+#' Colonization dynamics are determined by dispersal among habitat patches and
+#' trophic interactions, while extinction dynamics incorporate baseline
+#' extinction, prey-induced extinction, and disturbance synchrony.
+#'
+#' @return
+#' A matrix produced by \code{deSolve::ode()}, where the first column
+#' contains time and the remaining columns contain occupancy probabilities
+#' for each species-by-patch state variable.
+#'
+#' @export
+
+nspom <- function(
+    m = rbind(c(0, 1), c(1, 0)),
+    xi = NULL,
+    b = rbind(c(0, 0), c(1, 0)),
+    cp = 0.5,
+    theta = 1,
+    e = c(1, 1),
+    u = NULL,
+    rho = NULL,
+    x0 = NULL,
+    nt = 100,
+    intv = 0.1,
+    ...
+) {
+
+  ## checks --------------------------------------------------------------
+
+  args <- list(m = m, b = b)
+  if (!is.null(xi))
+    args$xi <- xi
+
+  for (nm in names(args)) {
+    if (!is.matrix(args[[nm]])) {
+      stop(sprintf("'%s' must be a matrix.", nm), call. = FALSE)
+    }
+  }
+
+  for (nm in names(args)) {
+    if (nrow(args[[nm]]) != ncol(args[[nm]])) {
+      stop(sprintf("'%s' must be square.", nm), call. = FALSE)
+    }
+  }
+
+  scalar <- list(cp = cp)
+  for (nm in names(scalar)) {
+    if (length(scalar[[nm]]) != 1) {
+      stop(sprintf("'%s' must be scalar.", nm), call. = FALSE)
+    }
+  }
+
+  if (!is.null(xi) && !all(dim(xi) == dim(m)))
+    stop("'xi' must have the same dimensions as 'm'.", call. = FALSE)
+
+  if (any(dim(b) > 2))
+    stop("'b' must be a 2 x 2 matrix (single predator and its prey).")
+
+  # n = number of habitat patches
+  # s = number of species
+  n <- nrow(m)
+  s <- nrow(b)
+
+  if (is.null(u))
+    u <- rep(0, n)
+
+  if (is.null(rho))
+    rho <- rep(0, n)
+
+  if (is.null(x0))
+    x0 <- rep(0.5, n)
+
+  if (length(e) != 2)
+    stop("'e' must have length 2.")
+
+  nargs <- list(u = u, x0 = x0, rho = rho)
+  for (nm in names(nargs)) {
+    if (length(nargs[[nm]]) != n)
+      stop("'", nm, "' must have length ", n, ".")
+  }
+
+  ## expand matrices -----------------------------------------------------
+
+  if (is.null(xi)) {
+    if (length(theta) != 1)
+      stop("'theta' must have length 1")
+
+    Mu <- Md <- kronecker(diag(n), m)
+    v_theta <- rep(0.5 * theta, 2)
+  } else {
+    if (length(theta) != 2)
+      stop("'theta' must have length 2")
+
+    m_u <- xi * m
+    m_d <- (1 - xi) * m
+    Mu <- kronecker(diag(n), m_u)
+    Md <- kronecker(diag(n), m_d)
+    v_theta <- theta
+  }
+
+  B <- kronecker(b, diag(2))
+
+  v_x0 <- rep(x0, s)
+  v_u <- rep(u, s)
+  v_rho <- rep(rho, s)
+  v_o <- rep(c(1, 0), each = n)
+
+  ## ODE -----------------------------------------------------------------
+
+  derivr <- function(t, x, parms) {
+
+    with(parms, {
+
+      # colonization
+      clnz <- cp * (theta[1] * (Mu %*% x) + theta[2] * (Md %*% x))
+      eta <- (B %*% x) + o
+
+      # extinction
+      extn <-
+        e[1] * (1 + rho * u) +
+        e[2] * (B %*% x)
+
+      # ode
+      dx <- clnz * (eta - x) - extn * x
+
+      list(dx)
+    })
+  }
+
+  parms <- list(
+    Mu = Mu,
+    Md = Md,
+    B = B,
+    o = v_o,
+    cp = cp,
+    theta = v_theta,
+    e = e,
+    rho = v_rho,
+    u = v_u
+  )
+
+  deSolve::ode(
+    y = v_x0,
+    times = seq(0, nt, by = intv),
+    func = derivr,
+    parms = parms,
+    ...
+  )
+}
