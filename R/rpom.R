@@ -277,7 +277,7 @@ p_base <- function(lambda,
   rho <- switch(
     kernel,
     linear = rho0 * (1 - nu * (diam / 3)),
-    exp = rho0 * laplace_rt(nu = nu, mu = diam, exact = exact),
+    exp = rho0 * laplace_rt(nu = nu, mu = diam),
     stop("Unknown kernel type: ", kernel)
   )
 
@@ -408,7 +408,7 @@ p_cnsm <- function(lambda,
   rho <- switch(
     kernel,
     linear = rho0 * (1 - nu * (diam / 3)),
-    exp = rho0 * laplace_rt(nu = nu, mu = diam, exact = exact),
+    exp = rho0 * laplace_rt(nu = nu, mu = diam),
     stop("Unknown kernel type: ", kernel)
   )
 
@@ -716,7 +716,7 @@ npom <- function(w,
     switch(
       kernel,
       linear = rho0 * (1 - v_nu * (diam / 3)),
-      exp = rho0 * v_laplace_rt(nu = v_nu, mu = diam, exact = exact),
+      exp = rho0 * v_laplace_rt(nu = v_nu, mu = diam),
       stop("Unknown kernel type: ", kernel)
     )
 
