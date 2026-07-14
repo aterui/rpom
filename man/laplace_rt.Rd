@@ -4,12 +4,14 @@
 \alias{laplace_rt}
 \title{Utility: Laplace transform of downstream distance}
 \usage{
-laplace_rt(nu, mu, mode = c("weighted", "random"))
+laplace_rt(nu, mu, weight = TRUE)
 }
 \arguments{
 \item{nu}{Positive rate parameter of the Laplace transform.}
 
 \item{mu}{Mean of the Rayleigh distribution for root-to-leaf distance.}
+
+\item{weight}{Logical. If \code{TRUE}, the Rayleigh distribution is length-weighted.}
 }
 \value{
 A numeric vector giving \eqn{E[\exp(-\nu d)]}, where
