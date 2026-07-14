@@ -2,6 +2,7 @@
 
 export(cpois)
 export(diameter)
+export(erfcx)
 export(fcl)
 export(laplace_rayleigh)
 export(laplace_rt)

@@ -4,26 +4,21 @@
 \alias{laplace_rt}
 \title{Utility: Laplace transform of downstream distance}
 \usage{
-laplace_rt(nu, mu, exact = TRUE)
+laplace_rt(nu, mu, mode = c("weighted", "random"))
 }
 \arguments{
 \item{nu}{Positive rate parameter of the Laplace transform.}
 
 \item{mu}{Mean of the Rayleigh distribution for root-to-leaf distance.}
-
-\item{exact}{Logical.
-If \code{TRUE}, computes the transform by numerical integration.
-If \code{FALSE}, uses the asymptotic approximation for large
-\code{nu * mu}.}
 }
 \value{
 A numeric vector giving \eqn{E[\exp(-\nu d)]}, where
-\eqn{d} is the downstream distance from the disturbance to a randomly
-selected affected habitat.
+\eqn{d} is the downstream distance from an upstream disturbance origin
+to a randomly selected affected habitat downstream.
 }
 \description{
-Computes the Laplace transform of the downstream distance from a randomly
-located disturbance to an affected habitat, assuming root-to-leaf distances
+Computes the Laplace transform of the expected travel distance from an
+upstream disturbance origin to an affected habitat, assuming root-to-leaf distances
 follow a Rayleigh distribution.
 }
 \author{
