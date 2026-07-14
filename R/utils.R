@@ -151,6 +151,15 @@ cpois <- function(lambda, size, min_z = 0) {
   return(cbind(z, pz))
 }
 
+#' Utility: scaled complementary error function
+#'
+#' @param x value(s)
+#' @export
+
+erfcx <- function(x) {
+  exp(log(2) + x^2 + pnorm(-x * sqrt(2), log.p = TRUE))
+}
+
 #' Utility: Laplace transform of a Rayleigh distribution
 #'
 #' Computes \code{E[exp(-delta * d)]} where d follows a Rayleigh distribution
@@ -167,65 +176,59 @@ cpois <- function(lambda, size, min_z = 0) {
 #' @export
 
 laplace_rayleigh <- function(delta, mu) {
-  1 - delta * mu * pracma::erfcx(delta * mu / sqrt(pi))
+  1 - delta * mu * erfcx(delta * mu / sqrt(pi))
 }
 
 #' Utility: Laplace transform of downstream distance
 #'
-#' Computes the Laplace transform of the downstream distance from a randomly
-#' located disturbance to an affected habitat, assuming root-to-leaf distances
+#' Computes the Laplace transform of the expected travel distance from an
+#' upstream disturbance origin to an affected habitat, assuming root-to-leaf distances
 #' follow a Rayleigh distribution.
 #'
 #' @param nu Positive rate parameter of the Laplace transform.
 #' @param mu Mean of the Rayleigh distribution for root-to-leaf distance.
-#' @param exact Logical.
-#'   If \code{TRUE}, computes the transform by numerical integration.
-#'   If \code{FALSE}, uses the asymptotic approximation for large
-#'   \code{nu * mu}.
 #'
 #' @return A numeric vector giving \eqn{E[\exp(-\nu d)]}, where
-#'   \eqn{d} is the downstream distance from the disturbance to a randomly
-#'   selected affected habitat.
+#'   \eqn{d} is the downstream distance from an upstream disturbance origin
+#'   to a randomly selected affected habitat downstream.
 #'
 #' @author Akira Terui
 #'
 #' @export
 
-laplace_rt <- function(nu, mu, exact = TRUE) {
+laplace_rt <- function(nu,
+                       mu,
+                       mode = c("weighted", "random")) {
 
   stopifnot(nu >= 0, mu > 0)
+  mode <- match.arg(mode)
 
   if (nu == 0)
     return(1)
 
-  if (!exact) {
-
-    y <- pi / (nu * mu) -
-      pi * log(nu * mu) / (nu * mu)^2
-
-    if (y > 1)
-      stop("Asymptotic approximation invalid: consider `exact = TRUE`")
-
-    if (nu * mu < 30)
-      warning("Asymptotic approximation unreliable: consider `exact = TRUE`")
-
-    return(y)
+  if (mode == "weighted") {
+    y <- 2 / (nu * mu) - (pi / (nu * mu)^2) * (1 - erfcx(nu * mu / sqrt(pi)))
   }
 
-  sigma <- mu * sqrt(2 / pi)
+  if (mode == "random") {
+    sigma <- mu * sqrt(2 / pi)
 
-  f <- function(l) {
-    (-expm1(-nu * l) / l) *
-      exp(-l^2 / (2 * sigma^2))
+    f <- function(l) {
+      (-expm1(-nu * l) / l) *
+        exp(-l^2 / (2 * sigma^2))
+    }
+
+    psi <- stats::integrate(
+      f,
+      lower = 0,
+      upper = Inf,
+      rel.tol = 1e-10,
+      subdivisions = 1000
+    )$value / sigma^2
+
+    y <- (pi * nu / mu - 2 * psi) / nu^2
   }
 
-  psi <- stats::integrate(
-    f,
-    lower = 0,
-    upper = Inf,
-    rel.tol = 1e-10,
-    subdivisions = 1000
-  )$value / sigma^2
-
-  (pi * nu / mu - 2 * psi) / nu^2
+  return(y)
 }
+
