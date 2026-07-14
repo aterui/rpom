@@ -157,7 +157,7 @@ cpois <- function(lambda, size, min_z = 0) {
 #' @export
 
 erfcx <- function(x) {
-  exp(log(2) + x^2 + pnorm(-x * sqrt(2), log.p = TRUE))
+  exp(log(2) + x^2 + stats::pnorm(-x * sqrt(2), log.p = TRUE))
 }
 
 #' Utility: Laplace transform of a Rayleigh distribution
@@ -187,6 +187,7 @@ laplace_rayleigh <- function(delta, mu) {
 #'
 #' @param nu Positive rate parameter of the Laplace transform.
 #' @param mu Mean of the Rayleigh distribution for root-to-leaf distance.
+#' @param weight Logical. If \code{TRUE}, the Rayleigh distribution is length-weighted.
 #'
 #' @return A numeric vector giving \eqn{E[\exp(-\nu d)]}, where
 #'   \eqn{d} is the downstream distance from an upstream disturbance origin
@@ -198,19 +199,19 @@ laplace_rayleigh <- function(delta, mu) {
 
 laplace_rt <- function(nu,
                        mu,
-                       mode = c("weighted", "random")) {
+                       weight = TRUE) {
 
   stopifnot(nu >= 0, mu > 0)
-  mode <- match.arg(mode)
 
   if (nu == 0)
     return(1)
 
-  if (mode == "weighted") {
-    y <- 2 / (nu * mu) - (pi / (nu * mu)^2) * (1 - erfcx(nu * mu / sqrt(pi)))
-  }
+  if (weight) {
 
-  if (mode == "random") {
+    y <- 2 / (nu * mu) - (pi / (nu * mu)^2) * (1 - erfcx(nu * mu / sqrt(pi)))
+
+  } else {
+
     sigma <- mu * sqrt(2 / pi)
 
     f <- function(l) {
