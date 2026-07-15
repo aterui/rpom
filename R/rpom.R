@@ -1038,8 +1038,9 @@ nspom <- function(
     args$xi <- xi
 
   for (nm in names(args)) {
-    if (!is.matrix(args[[nm]])) {
-      stop(sprintf("'%s' must be a matrix.", nm), call. = FALSE)
+    if (!(is.matrix(args[[nm]]) || inherits(args[[nm]], "Matrix"))) {
+      stop(sprintf("'%s' must be a matrix or sparse Matrix object.", nm),
+           call. = FALSE)
     }
   }
 
@@ -1091,7 +1092,7 @@ nspom <- function(
     if (length(theta) != 1)
       stop("'theta' must have length 1")
 
-    Mup <- Mdown <- kronecker(diag(n), m)
+    Mup <- Mdown <- kronecker(diag(s), m)
     v_theta <- rep(0.5 * theta, 2)
   } else {
     if (length(theta) != 2)
@@ -1099,8 +1100,8 @@ nspom <- function(
 
     m_up <- xi * m
     m_down <- (1 - xi) * m
-    Mup <- kronecker(diag(n), m_up)
-    Mdown <- kronecker(diag(n), m_down)
+    Mup <- kronecker(diag(s), m_up)
+    Mdown <- kronecker(diag(s), m_down)
     v_theta <- theta
   }
 
