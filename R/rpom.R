@@ -988,8 +988,7 @@ nfcl <- function(w,
 #'   parameters for each habitat patch.
 #' @param x0 Numeric vector of initial occupancy probabilities for each
 #'   habitat patch. Values are replicated across species.
-#' @param nt End time of the simulation.
-#' @param intv Output interval for numerical integration.
+#' @inheritParams npom
 #' @param ... Additional arguments passed to
 #'   \code{\link[deSolve]{ode}}().
 #'
@@ -1028,6 +1027,7 @@ nspom <- function(
     x0 = NULL,
     nt = 100,
     intv = 0.1,
+    threshold = 1e-05,
     ...
 ) {
 
@@ -1148,11 +1148,26 @@ nspom <- function(
     u = v_u
   )
 
+  ## define absorbing condition
+  ## - root function
+  rootfun <- function(t, x, parms) {
+    return(x - threshold)
+  }
+
+  ## - extinction: triggered when "x - threshold = 0"
+  eventfun <- function(t, x, parms) {
+    x <- ifelse(x <= threshold, 0, x)
+    return(x)
+  }
+
   deSolve::ode(
     y = v_x0,
     times = seq(0, nt, by = intv),
     func = derivr,
     parms = parms,
+    events = list(func = eventfun,
+                  root = TRUE),
+    rootfun = rootfun,
     ...
   )
 }

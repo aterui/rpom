@@ -17,6 +17,7 @@ nspom(
   x0 = NULL,
   nt = 100,
   intv = 0.1,
+  threshold = 1e-05,
   ...
 )
 }
@@ -55,9 +56,10 @@ parameters for each habitat patch.}
 \item{x0}{Numeric vector of initial occupancy probabilities for each
 habitat patch. Values are replicated across species.}
 
-\item{nt}{End time of the simulation.}
+\item{intv}{Numeric. Time interval between integration steps.}
 
-\item{intv}{Output interval for numerical integration.}
+\item{threshold}{Numeric. Occupancy threshold below which a species is
+considered extinct.}
 
 \item{...}{Additional arguments passed to
 \code{\link[deSolve]{ode}}().}
