@@ -1025,7 +1025,7 @@ nspom <- function(
     u = NULL,
     rho = NULL,
     x0 = NULL,
-    nt = 100,
+    n_timestep = 100,
     intv = 0.1,
     threshold = 1e-05,
     ...
@@ -1162,7 +1162,7 @@ nspom <- function(
 
   deSolve::ode(
     y = v_x0,
-    times = seq(0, nt, by = intv),
+    times = seq(0, n_timestep, by = intv),
     func = derivr,
     parms = parms,
     events = list(func = eventfun,

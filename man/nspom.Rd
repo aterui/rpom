@@ -15,7 +15,7 @@ nspom(
   u = NULL,
   rho = NULL,
   x0 = NULL,
-  nt = 100,
+  n_timestep = 100,
   intv = 0.1,
   threshold = 1e-05,
   ...
@@ -55,6 +55,8 @@ parameters for each habitat patch.}
 
 \item{x0}{Numeric vector of initial occupancy probabilities for each
 habitat patch. Values are replicated across species.}
+
+\item{n_timestep}{Integer. Number of time steps for numerical integration.}
 
 \item{intv}{Numeric. Time interval between integration steps.}
 
