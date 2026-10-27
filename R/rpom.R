@@ -73,16 +73,19 @@ u_length <- function(lambda, size, exact = TRUE) {
     stop("lambda and size must be > 0")
 
   if (exact) {
+    ## truncated poisson probabilities
     ## z: number of links minus 1
     ## pz: probability of b - 1 (= z) links
     m_pz <- cpois(lambda = lambda, size = size)
     z <- m_pz[, "z"]
     pz <- m_pz[, "pz"]
 
+    ## upstream link length conditional on z
     n_z <- exp((z + 2) * log(2) - lchoose(z + 2, 0.5 * (z + 2))) - 2
     l_z <- size / (z + 1)
     u_z <- l_z * (n_z + 0.5)
 
+    ## take expectation
     u_hat <- sum(u_z * pz)
   } else {
     ## order of approximation is ^-1/2
@@ -113,11 +116,15 @@ diameter <- function(lambda, size, exact = TRUE) {
     stop("lambda and size must be > 0")
 
   if (exact) {
+    ## truncated poisson probabilities
     m_pz <- cpois(lambda = lambda, size = size)
     z <- m_pz[, "z"]
     pz <- m_pz[, "pz"]
 
+    # log diameter conditional on z
     log_v <- log(size) - log(z + 2) + (z + 2) * log(2) - lchoose(z + 2, 0.5 * (z + 2))
+
+    # take expectation
     d <- sum(exp(log_v) * pz)
   } else {
     d <- sqrt(pi / 2) * sqrt(size / lambda)
@@ -148,23 +155,25 @@ pdist <- function(lambda, size, exact = TRUE) {
     stop("lambda and size must be > 0")
 
   if (exact) {
+    ## truncated poisson probabilities
     m_pz <- cpois(lambda = lambda, size = size)
     z <- m_pz[, "z"]
     pz <- m_pz[, "pz"]
 
-    ## "between" links cases for z >= 2 (>= 3 links present)
-    v <- numeric(length(z))
+    ## dw: distance between two points "within" a link
+    dw <- (2 * size) / ((z + 2) * (z + 3))
+
+    ## db: distance between two points "between" links
+    ## cases for z >= 2 (>= 3 links present)
+    db <- numeric(length(z))
     idx <- z > 0
 
-    A <- log(size) + log(z[idx] + 2) - log(z[idx]) - log(z[idx] + 1)
+    log_A <- log(size) - log(z[idx] + 1)
+    log_B <- (z[idx] + 2) * log(2) - lchoose(z[idx] + 2, 0.5 * (z[idx] + 2))
+    db[idx] <- exp(log_A + log_B) - 2 * exp(log_A)
 
-    B <- (z[idx] + 2) * log(2) - lchoose(z[idx] + 2, 0.5 * (z[idx] + 2))
-
-    v[idx] <- exp(A + B) - 2 * exp(A)
-
-    pw <- z / (z + 2)
-
-    nd_z <- pw * v + (1 - pw) * (2 * size / ((z + 2) * (z + 3)))
+    ## take expectation
+    nd_z <- dw + db
     nd <- sum(nd_z * pz)
   } else {
     nd <- sqrt(pi / 2) * sqrt(size / lambda) - (2 / lambda)
